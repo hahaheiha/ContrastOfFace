@@ -102,7 +102,20 @@ public class ExpressionAdapter extends RecyclerView.Adapter<ExpressionAdapter.Vi
                 ImageView detailPhoto = (ImageView) showBigPhoto.findViewById(R.id.detailPhoto);
                 detailPhoto.setImageBitmap(bitmap);
 
+                detailPhoto.setOnClickListener(new View.OnClickListener() {
+                    @Override
+                    public void onClick(View v) {
+                        showBigPhoto.dismiss();
+                    }
+                });
+
                 Button detailCancelButton = (Button) showBigPhoto.findViewById(R.id.detailCancelButton);
+                Button detailSureButton = (Button) showBigPhoto.findViewById(R.id.detailSureButton);
+
+                detailCancelButton.setVisibility(View.INVISIBLE);
+
+                detailSureButton.setVisibility(View.INVISIBLE);
+
                 detailCancelButton.setOnClickListener(new View.OnClickListener() {
                     @Override
                     public void onClick(View v) {
@@ -110,18 +123,13 @@ public class ExpressionAdapter extends RecyclerView.Adapter<ExpressionAdapter.Vi
                     }
                 });
 
-                Button detailSureButton = (Button) showBigPhoto.findViewById(R.id.detailSureButton);
                 detailSureButton.setOnClickListener(new View.OnClickListener() {
                     @Override
                     public void onClick(View v) {
-
-                        Intent intent = new Intent(parent.getContext(), MainActivity.class);
-        //                intent.putExtra(ExpressionActivity.EXP_NAME, exp.getImgName());
-                        intent.putExtra(ExpressionActivity.EXP_IMAGE_ID, exp.getImageId());
-                        parent.getContext().startActivity(intent);
                         showBigPhoto.dismiss();
                     }
                 });
+
 
             }
         });

@@ -10,6 +10,7 @@ import android.graphics.BitmapFactory;
 import android.net.Uri;
 import android.os.Bundle;
 import android.os.ParcelFileDescriptor;
+import android.text.Editable;
 import android.view.View;
 import android.view.WindowManager;
 import android.widget.ImageView;
@@ -125,7 +126,19 @@ public class ExpressionActivity extends AppCompatActivity {
 
                             String imageBase64 = BitmapUtil.bitmaptoString(bitmap);
 
-                            db.execSQL("insert into imagedb(base64) values(?)", new String[]{imageBase64});
+                            String sno = sNo.getText().toString();
+                            String sname = sName.getText().toString();
+                            String sgrade = sGrade.getText().toString();
+                            String sroom = sRoom.getText().toString();
+                            String sphone = sPhone.getText().toString();
+                            String steacher = sTeacher.getText().toString();
+                            String stphone = sTPhone.getText().toString();
+
+                            db.execSQL("insert into imagedb(base64, sno, sname, sgrade, sroom, sphone, steacher, stphone) values(?,?,?,?,?,?,?,?)",
+                                    new String[]{imageBase64, sno, sname, sgrade, sroom, sphone, steacher, stphone});
+
+//                            System.out.println(sno+ "|" + sname+ "|" + sgrade+ "|" + sroom+ "|" + sphone+ "|" + steacher+ "|" + stphone);
+
                             Cursor cursor = db.rawQuery("select imageid from imagedb order by imageid desc", null);
                             int imageId = 0;
                             if (cursor.moveToFirst()) {

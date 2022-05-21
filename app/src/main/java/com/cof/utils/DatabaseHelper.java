@@ -13,7 +13,14 @@ public class DatabaseHelper extends SQLiteOpenHelper {
 
     public static final String CREATE_IMAGEDB = "create table imagedb (" +
             "imageid integer primary key autoincrement, " +
-            "base64 text)";
+            "base64 text," +
+            "sno text," +
+            "sname text," +
+            "sgrade text," +
+            "sroom text," +
+            "sphone text," +
+            "steacher text," +
+            "stphone text)";
 
     private Context mContext;
 

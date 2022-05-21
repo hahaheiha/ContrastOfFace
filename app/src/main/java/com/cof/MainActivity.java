@@ -6,6 +6,8 @@ import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.content.pm.PackageManager;
+import android.database.Cursor;
+import android.database.sqlite.SQLiteDatabase;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.net.ConnectivityManager;
@@ -13,6 +15,7 @@ import android.net.NetworkInfo;
 import android.net.Uri;
 import android.os.Bundle;
 import android.os.Environment;
+import android.os.Handler;
 import android.os.ParcelFileDescriptor;
 import android.view.View;
 import android.widget.Button;
@@ -28,12 +31,14 @@ import androidx.core.content.ContextCompat;
 
 import com.cof.utils.BitmapUtil;
 import com.cof.utils.CustomerDialog;
+import com.cof.utils.DatabaseHelper;
 import com.cof.utils.ImageDataUtil;
 import com.cof.utils.ShowBigPhoto;
 import com.cof.utils.baidu.AuthService;
 import com.cof.utils.baidu.Base64Util;
 import com.cof.utils.baidu.GsonUtils;
 import com.cof.utils.baidu.HttpUtil;
+import com.google.android.material.card.MaterialCardView;
 import com.google.android.material.floatingactionbutton.FloatingActionButton;
 
 import java.io.File;
@@ -45,22 +50,26 @@ import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.HashMap;
+import java.util.Iterator;
+import java.util.LinkedHashMap;
+import java.util.Map;
+import java.util.Set;
+import java.util.Timer;
+import java.util.TimerTask;
 
 import entity.Result;
 import entity.ResultMsg;
 
 public class MainActivity extends AppCompatActivity {
 
-    public int leftCallCount = 0;   //左图调用次数
-    public int rightCallCount = 0;  //右图调用次数
     public static final int CHOOSE_PHOTO = 2;
     private ImageView chosenImageRight;
     private ImageView chosenImageLeft;
 //    private ImageView resultImage;
-    private TextView studentInfo;
+    private TextView loading;
 
     private byte[] templateImgBytes = null;
-    private byte[] mergeImgBytes = null;
+    private byte[] rightImgBytes = null;
 
 
     private boolean isVisible;
@@ -68,17 +77,30 @@ public class MainActivity extends AppCompatActivity {
 
     private Button rightAddButton;
     private Button leftAddButton;
+    private Button startButton;
     private FloatingActionButton addImage;
 
     private Bitmap chosenImageRightBitmap;
-    private Bitmap chosenImageLeftBitmap;
-    private Bitmap resultMergeBitmap;
+    private HashMap<String, String> stuInfo = new HashMap<>();
+
+    private LinkedHashMap<Integer, String> dbImages;
+
+    private Integer maxLikeImgId = 0;
+    private Integer maxLikeDegree = -1;
+    private String maxLikeImgBase64 = null;
+
+
+    Iterator<Map.Entry<Integer, String>> iteratorDBImg;
+
+    private MaterialCardView sInfo;
+
 
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
+
 
 
         ConnectivityManager cManager=(ConnectivityManager)getSystemService(Context.CONNECTIVITY_SERVICE);
@@ -108,31 +130,25 @@ public class MainActivity extends AppCompatActivity {
 
 
 
-//        new Runnable() {
-//            @Override
-//            public void run() {
-//                accessToken = AuthService.getAuth();
-//                System.out.println(accessToken);
-//            }
-//        };
-
-
-
+        sInfo = (MaterialCardView) findViewById(R.id.sInfo);
 
         chosenImageRight = (ImageView) findViewById(R.id.chosenImageRight);
         chosenImageLeft = (ImageView) findViewById(R.id.chosenImageLeft);
 //        resultImage = (ImageView) findViewById(R.id.resultImage);
-        studentInfo = (TextView) findViewById(R.id.studentInfo);
+        loading = (TextView) findViewById(R.id.loading);
 
         addImage =  (FloatingActionButton) findViewById(R.id.floatingButtonCenter);
         rightAddButton = (Button) findViewById(R.id.addRight);
         leftAddButton = (Button) findViewById(R.id.addLeft);
+        startButton = (Button) findViewById(R.id.startButton);
 
+        startButton.setVisibility(View.INVISIBLE);
         rightAddButton.setVisibility(View.INVISIBLE);
         leftAddButton.setVisibility(View.INVISIBLE);
 
         SharedPreferences pref = getSharedPreferences("isTip", MODE_PRIVATE);
         isShowAgain = pref.getBoolean("isShowAgain", true);
+
 
         if (isShowAgain) {
             Dialog dialog = new CustomerDialog(this, R.style.Dialog, R.layout.dialog);
@@ -167,18 +183,23 @@ public class MainActivity extends AppCompatActivity {
 
         }
 
+        sInfo.setVisibility(View.INVISIBLE);
+
         addImage.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
                 if (!isVisible) {
                     rightAddButton.setVisibility(View.VISIBLE);
                     leftAddButton.setVisibility(View.VISIBLE);
+                    startButton.setVisibility(View.VISIBLE);
                     addImage.setImageResource(R.drawable.ic_cancel);
                     isVisible = true;
+
                 }
                 else {
                     rightAddButton.setVisibility(View.INVISIBLE);
                     leftAddButton.setVisibility(View.INVISIBLE);
+                    startButton.setVisibility(View.INVISIBLE);
                     addImage.setImageResource(R.drawable.ic_and);
                     isVisible = false;
                 }
@@ -194,6 +215,7 @@ public class MainActivity extends AppCompatActivity {
 
                 }
                 else {
+
                     openAlbum();
                 }
             }
@@ -208,93 +230,11 @@ public class MainActivity extends AppCompatActivity {
         });
 
 
-//        resultImage.setOnLongClickListener(new View.OnLongClickListener() {
-//            @Override
-//            public boolean onLongClick(View v) {
-//                if (resultMergeBitmap == null) {
-//                    Toast.makeText(MainActivity.this, "未获取到融合图，请检查后重试。", Toast.LENGTH_SHORT).show();
-//                    return false;
-//                }
-//
-//                DateFormat format = new SimpleDateFormat("yyyyMMddHHmmss");
-//                String bitName = format.format(new Date()) + ".JPEG";
-//                Dialog dialog = new CustomerDialog(MainActivity.this, R.style.Dialog);
-//                dialog.setCanceledOnTouchOutside(false);
-//                dialog.show();
-//
-//                TextView dialogTitle = (TextView) dialog.findViewById(R.id.dialog_title);
-//                TextView dialogInfo = (TextView) dialog.findViewById(R.id.dialog_info);
-//                TextView dialogTextRight = (TextView) dialog.findViewById(R.id.dialog_text_right);
-//                TextView dialogTextLeft = (TextView) dialog.findViewById(R.id.dialog_text_left);
-//                dialogTextRight.setText("确定");
-//                dialogTextRight.setOnClickListener(new View.OnClickListener() {
-//                    @Override
-//                    public void onClick(View v) {
-//                        Toast.makeText(MainActivity.this, "保存成功", Toast.LENGTH_SHORT).show();
-//                        saveImage(resultMergeBitmap, bitName);
-//                        dialog.dismiss();
-//                    }
-//                });
-//                dialogTextLeft.setText("取消");
-//                dialogTextLeft.setOnClickListener(new View.OnClickListener() {
-//                    @Override
-//                    public void onClick(View v) {
-//                        dialog.dismiss();
-//                    }
-//                });
-//
-//                dialogTitle.setText("保存");
-//                dialogInfo.setText("是否保存该图片？\n保存路径为: DCIM/" + bitName);
-//
-//                return false;
-//            }
-//        });
-//
-//        resultImage.setOnClickListener(new View.OnClickListener() {
-//            @Override
-//            public void onClick(View v) {
-//
-//                ShowBigPhoto showBigPhoto = new ShowBigPhoto(MainActivity.this);
-//                showBigPhoto.show();
-//                ImageView detailPhoto = (ImageView) showBigPhoto.findViewById(R.id.detailPhoto);
-//                detailPhoto.setImageBitmap(resultMergeBitmap);
-//                detailPhoto.setOnClickListener(new View.OnClickListener() {
-//                    @Override
-//                    public void onClick(View v) {
-//                        showBigPhoto.dismiss();
-//                    }
-//                });
-//
-//                Button detailCancelButton = (Button) showBigPhoto.findViewById(R.id.detailCancelButton);
-//                detailCancelButton.setVisibility(View.GONE);
-//
-//                Button detailSureButton = (Button) showBigPhoto.findViewById(R.id.detailSureButton);
-//                detailSureButton.setVisibility(View.GONE);
-////                showBigPhoto.showDetailPhoto();
-//            }
-//        });
-
         chosenImageLeft.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                if (chosenImageLeftBitmap == null) return;
-
-                ShowBigPhoto showBigPhoto = new ShowBigPhoto(MainActivity.this);
-                showBigPhoto.show();
-                ImageView detailPhoto = (ImageView) showBigPhoto.findViewById(R.id.detailPhoto);
-                detailPhoto.setImageBitmap(chosenImageLeftBitmap);
-                detailPhoto.setOnClickListener(new View.OnClickListener() {
-                    @Override
-                    public void onClick(View v) {
-                        showBigPhoto.dismiss();
-                    }
-                });
-
-                Button detailCancelButton = (Button) showBigPhoto.findViewById(R.id.detailCancelButton);
-                detailCancelButton.setVisibility(View.GONE);
-
-                Button detailSureButton = (Button) showBigPhoto.findViewById(R.id.detailSureButton);
-                detailSureButton.setVisibility(View.GONE);
+                Intent intent = new Intent(MainActivity.this, ExpressionActivity.class);
+                startActivity(intent);
             }
         });
 
@@ -321,42 +261,38 @@ public class MainActivity extends AppCompatActivity {
                 detailSureButton.setVisibility(View.GONE);
             }
         });
+
+
+        startButton.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                sInfo.setVisibility(View.INVISIBLE);
+                loading.setVisibility(View.VISIBLE);
+                faceMatch();
+            }
+        });
+
     }
 
-    @Override
-    protected void onNewIntent(Intent intent) {
-        super.onNewIntent(intent);
-        setIntent(intent);
-        if (intent.getIntExtra(ExpressionActivity.EXP_IMAGE_ID, -1) != -1) {
-            setSelectImg(intent);
-        }
-    }
 
-    private void setSelectImg(Intent intent) {
-        leftCallCount++;
-        int imageid = intent.getIntExtra(ExpressionActivity.EXP_IMAGE_ID, 0);
-        HashMap<Integer, String> databaseImageMap = ImageDataUtil.getDatabaseImage(this);
-        chosenImageLeftBitmap = BitmapUtil.stringtoBitmap(databaseImageMap.get(imageid));
-        templateImgBytes = BitmapUtil.toByteArray(chosenImageLeftBitmap);
-        chosenImageLeft.setImageBitmap(chosenImageLeftBitmap);
-        studentInfo.setText("");
-        if(leftCallCount != rightCallCount) {
-            rightCallCount = leftCallCount - 1;
-            mergeImgBytes = null;
-//            resultImage.setImageBitmap(null);
-            resultMergeBitmap = null;
-            chosenImageRight.setImageBitmap(null);
-            chosenImageRightBitmap = null;
-            return;
-        }
-
-        faceMatch();
-
-//        createFacePP();
-    }
+//    @Override
+//    protected void onNewIntent(Intent intent) {
+//        super.onNewIntent(intent);
+//        setIntent(intent);
+//        if (intent.getIntExtra(ExpressionActivity.EXP_IMAGE_ID, -1) != -1) {
+////            setSelectImg(intent);
+//            setSelectImg();
+//        }
+//    }
+//
+//
+//    private void setSelectImg() {
+//        dbImages = ImageDataUtil.getDatabaseImage(this);
+//        iteratorDBImg = dbImages.entrySet().iterator();
+//    }
 
     private void openAlbum() {
-//        Intent intent = new Intent("android.intent.action.GET_CONTENT");
+
         Intent intent = new Intent(Intent.ACTION_OPEN_DOCUMENT);
         intent.addCategory(Intent.CATEGORY_OPENABLE);
         intent.setType("image/*");
@@ -378,37 +314,79 @@ public class MainActivity extends AppCompatActivity {
 
     }
 
-    public void createFacePP() {
-//            new Runnable() {
-//                @Override
-//                public void run() {
-                    String result = faceMatch();
-                    System.out.println(result);
-//                }
-//            };
 
-//        if(templateImgBytes == null || mergeImgBytes == null) return;
-//        FacePPApi facePPApi = new FacePPApi("PlK7L0c71QMIEhowrGDLuZcznML2qDHS","h3RYwP1_2jriAZaJqAQ1DansKH-5srfE-5srfE");
-//        HashMap<String, String> map = new HashMap<>();
-////        map.put("merge_rate", "50");
-////        map.put("feature_rate", "50");
-//
-//
-//        facePPApi.mergeFace(map, templateImgBytes, mergeImgBytes, new IFacePPCallBack<MergeFaceResponse>() {
-//            @Override
-//            public void onSuccess(MergeFaceResponse paramT) {
-//                showContrastResult(paramT);
-//            }
-//
-//            @Override
-//            public void onFailed(String paramString) {
-//                System.out.println(paramString);
-//                errorInfo(paramString);
-//            }
-//        });
+    public void showDialogResult() {
+        DatabaseHelper dbHelper = DatabaseHelper.getInstance(this);
+        SQLiteDatabase db = dbHelper.getWritableDatabase();
+
+        Cursor cursor = db.rawQuery("select sno, sname, sgrade, sroom, sphone, steacher, stphone from imagedb where imageid = ?", new String[]{maxLikeImgId.toString()});
+
+        if (cursor.moveToFirst()) {
+
+            String sno = cursor.getString(cursor.getColumnIndex("sno"));
+            String sname = cursor.getString(cursor.getColumnIndex("sname"));
+            String sgrade = cursor.getString(cursor.getColumnIndex("sgrade"));
+            String sroom = cursor.getString(cursor.getColumnIndex("sroom"));
+            String sphone = cursor.getString(cursor.getColumnIndex("sphone"));
+            String steacher = cursor.getString(cursor.getColumnIndex("steacher"));
+            String stphone = cursor.getString(cursor.getColumnIndex("stphone"));
+
+            stuInfo.put("sno", sno);
+            stuInfo.put("sname", sname);
+            stuInfo.put("sgrade", sgrade);
+            stuInfo.put("sroom", sroom);
+            stuInfo.put("sphone", sphone);
+            stuInfo.put("steacher", steacher);
+            stuInfo.put("stphone", stphone);
+
+        }
+
+        runOnUiThread(new Runnable() {
+            @Override
+            public void run() {
+//                StringBuilder builder = new StringBuilder();
+//                builder.append(maxLikeImgId).append("\n").append(maxLikeDegree);
+
+                Bitmap target = BitmapUtil.stringtoBitmap(dbImages.get(maxLikeImgId));
+                chosenImageLeft.setImageBitmap(target);
+
+                loading.setVisibility(View.INVISIBLE);
+                sInfo.setVisibility(View.VISIBLE);
+
+                TextView likeDegree = (TextView) findViewById(R.id.likeDegree);
+                TextView likeEva = (TextView) findViewById(R.id.likeEva);
+                TextView sno = (TextView) findViewById(R.id.sno_dis);
+                TextView sname = (TextView) findViewById(R.id.sname_dis);
+                TextView sgrade = (TextView) findViewById(R.id.sgrade_dis);
+                TextView sroom = (TextView) findViewById(R.id.sroom_dis);
+                TextView sphone = (TextView) findViewById(R.id.sphone_dis);
+                TextView steacher = (TextView) findViewById(R.id.steacher_dis);
+                TextView stphone = (TextView) findViewById(R.id.stphone_dis);
+
+                likeDegree.setText(maxLikeDegree + "%");
+
+                //TODO 根据相似程度分级
+                likeEva.setText("同一个人的可能性极高");
+
+                sno.setText(stuInfo.get("sno"));
+                sname.setText(stuInfo.get("sname"));
+                sgrade.setText(stuInfo.get("sgrade"));
+                sroom.setText(stuInfo.get("sroom"));
+                sphone.setText(stuInfo.get("sphone"));
+                steacher.setText(stuInfo.get("steacher"));
+                stphone.setText(stuInfo.get("stphone"));
+
+
+
+            }
+        });
+
     }
 
     public String faceMatch() {
+
+        dbImages = ImageDataUtil.getDatabaseImage(this);
+        iteratorDBImg = dbImages.entrySet().iterator();
 
         new Thread(new Runnable() {
             @Override
@@ -418,58 +396,70 @@ public class MainActivity extends AppCompatActivity {
 
                     String accessToken = AuthService.getAuth();
 
+                    while (iteratorDBImg.hasNext()) {
+
+                        Map.Entry<Integer, String> next = iteratorDBImg.next();
 //            byte[] bytes = FileUtil.readFileByBytes("D:\\JavaProjects\\ContrastTestBaidu\\src\\main\\resources\\1.png");
-                    String encode1 = Base64Util.encode(templateImgBytes);
+                        String encode1 = next.getValue();
 
-//            byte[] bytes1 = FileUtil.readFileByBytes("D:\\JavaProjects\\ContrastTestBaidu\\src\\main\\resources\\2.png");
-                    String encode2 = Base64Util.encode(mergeImgBytes);
-
-
-                    ArrayList<String> params = new ArrayList<>();
-
-                    HashMap<String, String> map = new HashMap<>();
-
-                    map.put("image", encode1);
-                    map.put("image_type", "BASE64");
-                    map.put("face_type", "LIVE");
-//            map.put("quality_control", "");
-//            map.put("liveness_control", "");
+                        runOnUiThread(new Runnable() {
+                            @Override
+                            public void run() {
+                                loading.setText("正在对比中......");
+                                chosenImageLeft.setImageBitmap(BitmapUtil.stringtoBitmap(next.getValue()));
+                            }
+                        });
 
 
-                    params.add(GsonUtils.toJson(map));
+                        String encode2 = Base64Util.encode(rightImgBytes);
 
-                    map.clear();
 
-                    map.put("image", encode2);
-                    map.put("image_type", "BASE64");
-                    map.put("face_type", "LIVE");
-//            map.put("quality_control", );
-//            map.put("liveness_control", );
+                        ArrayList<String> params = new ArrayList<>();
 
-                    params.add(GsonUtils.toJson(map));
+                        HashMap<String, String> map = new HashMap<>();
+
+                        map.put("image", encode1);
+                        map.put("image_type", "BASE64");
+                        map.put("face_type", "LIVE");
+
+                        params.add(GsonUtils.toJson(map));
+
+                        map.clear();
+
+                        map.put("image", encode2);
+                        map.put("image_type", "BASE64");
+                        map.put("face_type", "LIVE");
+
+                        params.add(GsonUtils.toJson(map));
 //
-//            HashMap<String, String> map = new HashMap<>();
-
-//            String param = GsonUtils.toJson(map);
 
 
-
-                    // 注意这里仅为了简化编码每一次请求都去获取access_token，线上环境access_token有过期时间， 客户端可自行缓存，过期后重新获取。
+                        // 注意这里仅为了简化编码每一次请求都去获取access_token，线上环境access_token有过期时间， 客户端可自行缓存，过期后重新获取。
 //            String accessToken = "[调用鉴权接口获取的token]";
 
-                    String result = HttpUtil.post(url, accessToken, "application/json", params.toString());
-                    showContrastResult(result);
-//                    System.out.println(result);
-////                    return result;
-//                    resultData = result;
+                        String result = HttpUtil.post(url, accessToken, "application/json", params.toString());
+//                    showContrastResult(result);
+
+                        ResultMsg resultMsg = GsonUtils.fromJson(result, ResultMsg.class);
+
+                        if (resultMsg.getError_code() == 0) {
+                            Result conResult = resultMsg.getResult();
+                            if (conResult.getScore().intValue() > maxLikeDegree) {
+                                maxLikeImgId = next.getKey();
+                                maxLikeDegree = conResult.getScore().intValue();
+                            }
+                        }
+
+
+                    }
+
+                    showDialogResult();
+
                 } catch (Exception e) {
                     e.printStackTrace();
                 }
             }
         }).start();
-
-//        TestBackGround testBackGround = new TestBackGround();
-//        String accessToken = testBackGround.doInBackground(null);
 
         // 请求url
 
@@ -490,101 +480,33 @@ public class MainActivity extends AppCompatActivity {
                     showBigPhoto.show();
                     ImageView detailPhoto = (ImageView) showBigPhoto.findViewById(R.id.detailPhoto);
                     detailPhoto.setImageBitmap(chosenImageRightBitmap);
-                    detailPhoto.setOnClickListener(new View.OnClickListener() {
-                        @Override
-                        public void onClick(View v) {
-                            showBigPhoto.dismiss();
-                        }
-                    });
+
 
                     Button detailCancelButton = (Button) showBigPhoto.findViewById(R.id.detailCancelButton);
+                    Button detailSureButton = (Button) showBigPhoto.findViewById(R.id.detailSureButton);
+
+
                     detailCancelButton.setOnClickListener(new View.OnClickListener() {
                         @Override
                         public void onClick(View v) {
-//                            if (rightCallCount != leftCallCount) {
-//                                leftCallCount = rightCallCount - 1;
-//                                resultImage.setImageBitmap(null);
-//                                resultMergeBitmap = null;
-//                                chosenImageLeftBitmap = null;
-//                                chosenImageLeft.setImageBitmap(null);
-//                                chosenImageRightBitmap = null;
-//                                chosenImageRight.setImageBitmap(null);
-//                                mergeImgBytes = null;
-//                            }
                             showBigPhoto.dismiss();
                         }
                     });
 
-                    Button detailSureButton = (Button) showBigPhoto.findViewById(R.id.detailSureButton);
                     detailSureButton.setOnClickListener(new View.OnClickListener() {
                         @Override
                         public void onClick(View v) {
-                            rightCallCount++;
-                            if (rightCallCount != leftCallCount) {
-                                leftCallCount = rightCallCount - 1;
-                                templateImgBytes = null;
-//                                resultImage.setImageBitmap(null);
-                                resultMergeBitmap = null;
-                                chosenImageLeftBitmap = null;
-                                chosenImageLeft.setImageBitmap(null);
-                            }
-                            studentInfo.setText("");
+                            loading.setText("");
                             chosenImageRight.setImageBitmap(chosenImageRightBitmap);
-                            mergeImgBytes = BitmapUtil.toByteArray(chosenImageRightBitmap);
+                            rightImgBytes = BitmapUtil.toByteArray(chosenImageRightBitmap);
                             showBigPhoto.dismiss();
-//                            createFacePP();
-                            faceMatch();
                         }
                     });
-//                    if (rightCallCount != leftCallCount) {
-//                        leftCallCount = rightCallCount - 1;
-//                        resultMergeBitmap = null;
-//                        resultImage.setImageBitmap(null);
-//                        chosenImageLeftBitmap = null;
-//                        chosenImageLeft.setImageBitmap(null);
-//                        mergeImgBytes = null;
-//                        return;
-//                    }
-
                 }
                 break;
         }
     }
 
-    private void showContrastResult(String result) {
-        runOnUiThread(new Runnable() {
-            @Override
-            public void run() {
-                rightAddButton.setVisibility(View.INVISIBLE);
-                leftAddButton.setVisibility(View.INVISIBLE);
-                addImage.setImageResource(R.drawable.ic_and);
-                isVisible = false;
-//                resultMergeBitmap = BitmapUtil.stringtoBitmap(paramT.getResult());
-//                resultImage.setImageBitmap(resultMergeBitmap);
-
-                ResultMsg resultMsg = GsonUtils.fromJson(result, ResultMsg.class);
-                if (resultMsg.getError_code() != 0) {
-                    studentInfo.setText("未知错误！请稍后重试！");
-                }
-                else {
-                    Result result = resultMsg.getResult();
-                    StringBuilder sBuilder = new StringBuilder();
-                    sBuilder.append("--已找到最佳匹配的学生--").append("\n").append("\n")
-                            .append("相似度：").append(result.getScore().intValue()).append("%").append("\n").append("\n")
-                            .append("学号：").append(123456789).append("\n").append("\n")
-                            .append("姓名：").append("哈哈").append("\n").append("\n")
-                            .append("班级：").append("2019级软件工程2班").append("\n").append("\n")
-                            .append("宿舍：").append("C710").append("\n").append("\n")
-                            .append("联系方式：").append("17657867511").append("\n").append("\n")
-                            .append("班主任：").append("嘻嘻").append("\n").append("\n")
-                            .append("班主任联系方式：").append("19874565271");
-                    studentInfo.setText(sBuilder.toString());
-                }
-
-//                System.out.println(paramT.getConfidence());
-            }
-        });
-    }
 
 
     private Bitmap getBitmapFromUri(Uri uri) {
@@ -599,27 +521,6 @@ public class MainActivity extends AppCompatActivity {
         return bitmap;
     }
 
-    private void saveImage(Bitmap bitmap, String bitName) {
-        String fileName ;
-        File file ;
-        fileName = Environment.getExternalStorageDirectory().getPath()+"/DCIM/"+bitName ;
-        file = new File(fileName);
-        try {
-
-            FileOutputStream fos = new FileOutputStream(file);
-            bitmap.compress(Bitmap.CompressFormat.JPEG, 100, fos);
-            fos.flush();
-            fos.close();
-        } catch (FileNotFoundException e) {
-            e.printStackTrace();
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
-        Intent intent = new Intent(Intent.ACTION_MEDIA_SCANNER_SCAN_FILE);
-        Uri uri = Uri.fromFile(file);
-        intent.setData(uri);
-        sendBroadcast(intent);
-    }
 
     private void errorInfo(String paramString) {
 
