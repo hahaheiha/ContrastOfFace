@@ -79,7 +79,7 @@
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:backgroundTint="@color/white"
-                android:text="添加模板"
+                android:text="人脸数据库"
                 android:layout_marginRight="80dp"
                 android:textColor="@color/black" />
             <Button
@@ -87,19 +87,20 @@
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:backgroundTint="@color/white"
-                android:text="添加人脸"
+                android:text="添加需对比人脸"
                 android:textColor="@color/black"/>
 
 
             </LinearLayout>
 
             <TextView
-                android:id="@+id/saveText"
+                android:id="@+id/studentInfo"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:layout_gravity="center"
                 android:layout_marginTop="10dp"
-                android:textSize="24sp"
+                android:textColor="@color/black"
+                android:textSize="20sp"
                 android:gravity="center" />
 
             <com.google.android.material.card.MaterialCardView
@@ -113,11 +114,11 @@
 
 
 
-                <ImageView
-                    android:id="@+id/resultImage"
-                    android:layout_gravity="center"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content" />
+<!--                <ImageView-->
+<!--                    android:id="@+id/resultImage"-->
+<!--                    android:layout_gravity="center"-->
+<!--                    android:layout_width="wrap_content"-->
+<!--                    android:layout_height="wrap_content" />-->
 
             </com.google.android.material.card.MaterialCardView>
 

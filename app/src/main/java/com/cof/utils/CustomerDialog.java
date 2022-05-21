@@ -20,10 +20,10 @@ public class CustomerDialog extends Dialog{
         this.setContentView(R.layout.dialog);
     }
 
-    public CustomerDialog(@NonNull Context context, int themeResId) {
+    public CustomerDialog(@NonNull Context context, int themeResId, int layoutId) {
         super(context, themeResId);
         this.context = context;
-        this.setContentView(R.layout.dialog);
+        this.setContentView(layoutId);
     }
 
     @Override

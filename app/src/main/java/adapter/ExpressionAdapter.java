@@ -132,7 +132,7 @@ public class ExpressionAdapter extends RecyclerView.Adapter<ExpressionAdapter.Vi
                 Expression exp = mExpList.get(position);
                 int imageId = exp.getImageId();
 
-                Dialog dialog = new CustomerDialog(mContext, R.style.Dialog);
+                Dialog dialog = new CustomerDialog(mContext, R.style.Dialog, R.layout.dialog);
                 dialog.setCanceledOnTouchOutside(false);
                 dialog.show();
 

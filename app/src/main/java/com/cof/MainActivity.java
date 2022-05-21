@@ -56,8 +56,8 @@ public class MainActivity extends AppCompatActivity {
     public static final int CHOOSE_PHOTO = 2;
     private ImageView chosenImageRight;
     private ImageView chosenImageLeft;
-    private ImageView resultImage;
-    private TextView saveText;
+//    private ImageView resultImage;
+    private TextView studentInfo;
 
     private byte[] templateImgBytes = null;
     private byte[] mergeImgBytes = null;
@@ -85,7 +85,7 @@ public class MainActivity extends AppCompatActivity {
         NetworkInfo info = cManager.getActiveNetworkInfo();
         if (info != null && info.isAvailable()){
         }else{
-            Dialog dialog = new CustomerDialog(this, R.style.Dialog);
+            Dialog dialog = new CustomerDialog(this, R.style.Dialog, R.layout.dialog);
             dialog.setCanceledOnTouchOutside(false);
             dialog.show();
 
@@ -121,8 +121,8 @@ public class MainActivity extends AppCompatActivity {
 
         chosenImageRight = (ImageView) findViewById(R.id.chosenImageRight);
         chosenImageLeft = (ImageView) findViewById(R.id.chosenImageLeft);
-        resultImage = (ImageView) findViewById(R.id.resultImage);
-        saveText = (TextView) findViewById(R.id.saveText);
+//        resultImage = (ImageView) findViewById(R.id.resultImage);
+        studentInfo = (TextView) findViewById(R.id.studentInfo);
 
         addImage =  (FloatingActionButton) findViewById(R.id.floatingButtonCenter);
         rightAddButton = (Button) findViewById(R.id.addRight);
@@ -135,7 +135,7 @@ public class MainActivity extends AppCompatActivity {
         isShowAgain = pref.getBoolean("isShowAgain", true);
 
         if (isShowAgain) {
-            Dialog dialog = new CustomerDialog(this, R.style.Dialog);
+            Dialog dialog = new CustomerDialog(this, R.style.Dialog, R.layout.dialog);
             dialog.setCanceledOnTouchOutside(false);
             dialog.show();
 
@@ -208,71 +208,71 @@ public class MainActivity extends AppCompatActivity {
         });
 
 
-        resultImage.setOnLongClickListener(new View.OnLongClickListener() {
-            @Override
-            public boolean onLongClick(View v) {
-                if (resultMergeBitmap == null) {
-                    Toast.makeText(MainActivity.this, "未获取到融合图，请检查后重试。", Toast.LENGTH_SHORT).show();
-                    return false;
-                }
-
-                DateFormat format = new SimpleDateFormat("yyyyMMddHHmmss");
-                String bitName = format.format(new Date()) + ".JPEG";
-                Dialog dialog = new CustomerDialog(MainActivity.this, R.style.Dialog);
-                dialog.setCanceledOnTouchOutside(false);
-                dialog.show();
-
-                TextView dialogTitle = (TextView) dialog.findViewById(R.id.dialog_title);
-                TextView dialogInfo = (TextView) dialog.findViewById(R.id.dialog_info);
-                TextView dialogTextRight = (TextView) dialog.findViewById(R.id.dialog_text_right);
-                TextView dialogTextLeft = (TextView) dialog.findViewById(R.id.dialog_text_left);
-                dialogTextRight.setText("确定");
-                dialogTextRight.setOnClickListener(new View.OnClickListener() {
-                    @Override
-                    public void onClick(View v) {
-                        Toast.makeText(MainActivity.this, "保存成功", Toast.LENGTH_SHORT).show();
-                        saveImage(resultMergeBitmap, bitName);
-                        dialog.dismiss();
-                    }
-                });
-                dialogTextLeft.setText("取消");
-                dialogTextLeft.setOnClickListener(new View.OnClickListener() {
-                    @Override
-                    public void onClick(View v) {
-                        dialog.dismiss();
-                    }
-                });
-
-                dialogTitle.setText("保存");
-                dialogInfo.setText("是否保存该图片？\n保存路径为: DCIM/" + bitName);
-
-                return false;
-            }
-        });
-
-        resultImage.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-
-                ShowBigPhoto showBigPhoto = new ShowBigPhoto(MainActivity.this);
-                showBigPhoto.show();
-                ImageView detailPhoto = (ImageView) showBigPhoto.findViewById(R.id.detailPhoto);
-                detailPhoto.setImageBitmap(resultMergeBitmap);
-                detailPhoto.setOnClickListener(new View.OnClickListener() {
-                    @Override
-                    public void onClick(View v) {
-                        showBigPhoto.dismiss();
-                    }
-                });
-
-                Button detailCancelButton = (Button) showBigPhoto.findViewById(R.id.detailCancelButton);
-                detailCancelButton.setVisibility(View.GONE);
-
-                Button detailSureButton = (Button) showBigPhoto.findViewById(R.id.detailSureButton);
-                detailSureButton.setVisibility(View.GONE);
-//                showBigPhoto.showDetailPhoto();
-            }
-        });
+//        resultImage.setOnLongClickListener(new View.OnLongClickListener() {
+//            @Override
+//            public boolean onLongClick(View v) {
+//                if (resultMergeBitmap == null) {
+//                    Toast.makeText(MainActivity.this, "未获取到融合图，请检查后重试。", Toast.LENGTH_SHORT).show();
+//                    return false;
+//                }
+//
+//                DateFormat format = new SimpleDateFormat("yyyyMMddHHmmss");
+//                String bitName = format.format(new Date()) + ".JPEG";
+//                Dialog dialog = new CustomerDialog(MainActivity.this, R.style.Dialog);
+//                dialog.setCanceledOnTouchOutside(false);
+//                dialog.show();
+//
+//                TextView dialogTitle = (TextView) dialog.findViewById(R.id.dialog_title);
+//                TextView dialogInfo = (TextView) dialog.findViewById(R.id.dialog_info);
+//                TextView dialogTextRight = (TextView) dialog.findViewById(R.id.dialog_text_right);
+//                TextView dialogTextLeft = (TextView) dialog.findViewById(R.id.dialog_text_left);
+//                dialogTextRight.setText("确定");
+//                dialogTextRight.setOnClickListener(new View.OnClickListener() {
+//                    @Override
+//                    public void onClick(View v) {
+//                        Toast.makeText(MainActivity.this, "保存成功", Toast.LENGTH_SHORT).show();
+//                        saveImage(resultMergeBitmap, bitName);
+//                        dialog.dismiss();
+//                    }
+//                });
+//                dialogTextLeft.setText("取消");
+//                dialogTextLeft.setOnClickListener(new View.OnClickListener() {
+//                    @Override
+//                    public void onClick(View v) {
+//                        dialog.dismiss();
+//                    }
+//                });
+//
+//                dialogTitle.setText("保存");
+//                dialogInfo.setText("是否保存该图片？\n保存路径为: DCIM/" + bitName);
+//
+//                return false;
+//            }
+//        });
+//
+//        resultImage.setOnClickListener(new View.OnClickListener() {
+//            @Override
+//            public void onClick(View v) {
+//
+//                ShowBigPhoto showBigPhoto = new ShowBigPhoto(MainActivity.this);
+//                showBigPhoto.show();
+//                ImageView detailPhoto = (ImageView) showBigPhoto.findViewById(R.id.detailPhoto);
+//                detailPhoto.setImageBitmap(resultMergeBitmap);
+//                detailPhoto.setOnClickListener(new View.OnClickListener() {
+//                    @Override
+//                    public void onClick(View v) {
+//                        showBigPhoto.dismiss();
+//                    }
+//                });
+//
+//                Button detailCancelButton = (Button) showBigPhoto.findViewById(R.id.detailCancelButton);
+//                detailCancelButton.setVisibility(View.GONE);
+//
+//                Button detailSureButton = (Button) showBigPhoto.findViewById(R.id.detailSureButton);
+//                detailSureButton.setVisibility(View.GONE);
+////                showBigPhoto.showDetailPhoto();
+//            }
+//        });
 
         chosenImageLeft.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -339,17 +339,20 @@ public class MainActivity extends AppCompatActivity {
         chosenImageLeftBitmap = BitmapUtil.stringtoBitmap(databaseImageMap.get(imageid));
         templateImgBytes = BitmapUtil.toByteArray(chosenImageLeftBitmap);
         chosenImageLeft.setImageBitmap(chosenImageLeftBitmap);
-        saveText.setText("");
+        studentInfo.setText("");
         if(leftCallCount != rightCallCount) {
             rightCallCount = leftCallCount - 1;
             mergeImgBytes = null;
-            resultImage.setImageBitmap(null);
+//            resultImage.setImageBitmap(null);
             resultMergeBitmap = null;
             chosenImageRight.setImageBitmap(null);
             chosenImageRightBitmap = null;
             return;
         }
-        createFacePP();
+
+        faceMatch();
+
+//        createFacePP();
     }
 
     private void openAlbum() {
@@ -394,7 +397,7 @@ public class MainActivity extends AppCompatActivity {
 //        facePPApi.mergeFace(map, templateImgBytes, mergeImgBytes, new IFacePPCallBack<MergeFaceResponse>() {
 //            @Override
 //            public void onSuccess(MergeFaceResponse paramT) {
-//                showMergeResult(paramT);
+//                showContrastResult(paramT);
 //            }
 //
 //            @Override
@@ -455,7 +458,7 @@ public class MainActivity extends AppCompatActivity {
 //            String accessToken = "[调用鉴权接口获取的token]";
 
                     String result = HttpUtil.post(url, accessToken, "application/json", params.toString());
-                    showMergeResult(result);
+                    showContrastResult(result);
 //                    System.out.println(result);
 ////                    return result;
 //                    resultData = result;
@@ -520,16 +523,17 @@ public class MainActivity extends AppCompatActivity {
                             if (rightCallCount != leftCallCount) {
                                 leftCallCount = rightCallCount - 1;
                                 templateImgBytes = null;
-                                resultImage.setImageBitmap(null);
+//                                resultImage.setImageBitmap(null);
                                 resultMergeBitmap = null;
                                 chosenImageLeftBitmap = null;
                                 chosenImageLeft.setImageBitmap(null);
                             }
-                            saveText.setText("");
+                            studentInfo.setText("");
                             chosenImageRight.setImageBitmap(chosenImageRightBitmap);
                             mergeImgBytes = BitmapUtil.toByteArray(chosenImageRightBitmap);
                             showBigPhoto.dismiss();
-                            createFacePP();
+//                            createFacePP();
+                            faceMatch();
                         }
                     });
 //                    if (rightCallCount != leftCallCount) {
@@ -547,7 +551,7 @@ public class MainActivity extends AppCompatActivity {
         }
     }
 
-    private void showMergeResult(String result) {
+    private void showContrastResult(String result) {
         runOnUiThread(new Runnable() {
             @Override
             public void run() {
@@ -560,11 +564,21 @@ public class MainActivity extends AppCompatActivity {
 
                 ResultMsg resultMsg = GsonUtils.fromJson(result, ResultMsg.class);
                 if (resultMsg.getError_code() != 0) {
-                    saveText.setText("未知错误！请稍后重试！");
+                    studentInfo.setText("未知错误！请稍后重试！");
                 }
                 else {
                     Result result = resultMsg.getResult();
-                    saveText.setText(result.getScore().toString());
+                    StringBuilder sBuilder = new StringBuilder();
+                    sBuilder.append("--已找到最佳匹配的学生--").append("\n").append("\n")
+                            .append("相似度：").append(result.getScore().intValue()).append("%").append("\n").append("\n")
+                            .append("学号：").append(123456789).append("\n").append("\n")
+                            .append("姓名：").append("哈哈").append("\n").append("\n")
+                            .append("班级：").append("2019级软件工程2班").append("\n").append("\n")
+                            .append("宿舍：").append("C710").append("\n").append("\n")
+                            .append("联系方式：").append("17657867511").append("\n").append("\n")
+                            .append("班主任：").append("嘻嘻").append("\n").append("\n")
+                            .append("班主任联系方式：").append("19874565271");
+                    studentInfo.setText(sBuilder.toString());
                 }
 
 //                System.out.println(paramT.getConfidence());
@@ -636,7 +650,7 @@ public class MainActivity extends AppCompatActivity {
                     info = "下载图片超时。";
                 }
 
-                Dialog dialog = new CustomerDialog(MainActivity.this, R.style.Dialog);
+                Dialog dialog = new CustomerDialog(MainActivity.this, R.style.Dialog, R.layout.dialog);
                 dialog.setCanceledOnTouchOutside(false);
                 dialog.show();
 

@@ -11,6 +11,9 @@ import android.net.Uri;
 import android.os.Bundle;
 import android.os.ParcelFileDescriptor;
 import android.view.View;
+import android.view.WindowManager;
+import android.widget.ImageView;
+import android.widget.TextView;
 import android.widget.Toast;
 
 import androidx.annotation.NonNull;
@@ -22,8 +25,10 @@ import androidx.recyclerview.widget.GridLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
 import com.cof.utils.BitmapUtil;
+import com.cof.utils.CustomerDialog;
 import com.cof.utils.DatabaseHelper;
 import com.google.android.material.floatingactionbutton.FloatingActionButton;
+import com.google.android.material.textfield.TextInputEditText;
 
 import java.io.FileNotFoundException;
 import java.util.ArrayList;
@@ -89,19 +94,60 @@ public class ExpressionActivity extends AppCompatActivity {
             case CHOOSE_PHOTO:
                 if (resultCode == RESULT_OK) {
 //                    int position = adapter.getItemCount();
+
+
                     Uri uri = data.getData();
                     Bitmap bitmap = getBitmapFromUri(uri);
-                    String imageBase64 = BitmapUtil.bitmaptoString(bitmap);
 
-                    db.execSQL("insert into imagedb(base64) values(?)", new String[]{imageBase64});
-                    Cursor cursor = db.rawQuery("select imageid from imagedb order by imageid desc", null);
-                    int imageId = 0;
-                    if (cursor.moveToFirst()) {
-                        imageId = cursor.getInt(cursor.getColumnIndex("imageid"));
-                    }
-                    expList.add(0, new Expression(imageId));
-                    adapter.notifyItemInserted(0);
-                    recyclerView.getLayoutManager().scrollToPosition(0);
+                    CustomerDialog inputDialog = new CustomerDialog(this, R.style.Dialog, R.layout.input_dialog);
+                    inputDialog.setCanceledOnTouchOutside(false);
+                    inputDialog.show();
+
+                    ImageView sPreview = (ImageView) inputDialog.findViewById(R.id.sPreview);
+                    sPreview.setImageBitmap(bitmap);
+
+                    TextInputEditText sNo = (TextInputEditText) inputDialog.findViewById(R.id.sNo);
+                    TextInputEditText sName = (TextInputEditText) inputDialog.findViewById(R.id.sName);
+                    TextInputEditText sGrade = (TextInputEditText) inputDialog.findViewById(R.id.sGrade);
+                    TextInputEditText sRoom = (TextInputEditText) inputDialog.findViewById(R.id.sRoom);
+                    TextInputEditText sPhone = (TextInputEditText) inputDialog.findViewById(R.id.sPhone);
+                    TextInputEditText sTeacher = (TextInputEditText) inputDialog.findViewById(R.id.sTeacher);
+                    TextInputEditText sTPhone = (TextInputEditText) inputDialog.findViewById(R.id.sTPhone);
+
+                    TextView dCancel = (TextView) inputDialog.findViewById(R.id.dialog_cancel);
+                    TextView dAssure = (TextView) inputDialog.findViewById(R.id.dialog_assure);
+
+
+
+                    dAssure.setOnClickListener(new View.OnClickListener() {
+                        @Override
+                        public void onClick(View v) {
+
+                            String imageBase64 = BitmapUtil.bitmaptoString(bitmap);
+
+                            db.execSQL("insert into imagedb(base64) values(?)", new String[]{imageBase64});
+                            Cursor cursor = db.rawQuery("select imageid from imagedb order by imageid desc", null);
+                            int imageId = 0;
+                            if (cursor.moveToFirst()) {
+                                imageId = cursor.getInt(cursor.getColumnIndex("imageid"));
+                            }
+                            expList.add(0, new Expression(imageId));
+                            adapter.notifyItemInserted(0);
+                            recyclerView.getLayoutManager().scrollToPosition(0);
+                            inputDialog.dismiss();
+                            Toast.makeText(ExpressionActivity.this, "添加成功", Toast.LENGTH_SHORT).show();
+
+                        }
+                    });
+
+                    dCancel.setOnClickListener(new View.OnClickListener() {
+                        @Override
+                        public void onClick(View v) {
+                            inputDialog.dismiss();
+                            Toast.makeText(ExpressionActivity.this, "取消添加", Toast.LENGTH_SHORT).show();
+                        }
+                    });
+
                 }
         }
     }
