@@ -1,3 +1,2 @@
-include ':lib-facepp_api'
 include ':app'
-rootProject.name = "JinianTest1"
+rootProject.name = "ContrastOfFace"

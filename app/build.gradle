@@ -7,7 +7,7 @@ android {
     buildToolsVersion "30.0.3"
 
     defaultConfig {
-        applicationId "com.jinian.test1"
+        applicationId "com.cof"
         minSdkVersion 16
         targetSdkVersion 30
         versionCode 4
@@ -29,6 +29,7 @@ android {
 }
 
 dependencies {
+    implementation 'com.google.code.gson:gson:2.9.0'
     implementation group: 'com.github.bumptech.glide', name: 'glide', version: '4.9.0'
     implementation 'androidx.recyclerview:recyclerview:1.0.0'
     implementation group: 'com.alibaba', name: 'fastjson', version: '1.2.75'
