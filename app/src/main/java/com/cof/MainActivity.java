@@ -26,10 +26,14 @@ import androidx.appcompat.app.AppCompatActivity;
 import androidx.core.app.ActivityCompat;
 import androidx.core.content.ContextCompat;
 
-import com.cof.baidu.AuthService;
-import com.cof.baidu.Base64Util;
-import com.cof.baidu.GsonUtils;
-import com.cof.baidu.HttpUtil;
+import com.cof.utils.BitmapUtil;
+import com.cof.utils.CustomerDialog;
+import com.cof.utils.ImageDataUtil;
+import com.cof.utils.ShowBigPhoto;
+import com.cof.utils.baidu.AuthService;
+import com.cof.utils.baidu.Base64Util;
+import com.cof.utils.baidu.GsonUtils;
+import com.cof.utils.baidu.HttpUtil;
 import com.google.android.material.floatingactionbutton.FloatingActionButton;
 import com.jinian.test1.R;
 

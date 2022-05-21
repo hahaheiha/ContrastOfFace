@@ -1,4 +1,4 @@
-package com.cof.baidu;
+package com.cof.utils.baidu;
 
 import java.io.BufferedReader;
 import java.io.DataOutputStream;

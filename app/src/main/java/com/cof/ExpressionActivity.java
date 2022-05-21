@@ -21,6 +21,8 @@ import androidx.core.content.ContextCompat;
 import androidx.recyclerview.widget.GridLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
+import com.cof.utils.BitmapUtil;
+import com.cof.utils.DatabaseHelper;
 import com.google.android.material.floatingactionbutton.FloatingActionButton;
 import com.jinian.test1.R;
 

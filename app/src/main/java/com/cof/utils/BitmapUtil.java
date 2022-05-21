@@ -1,4 +1,4 @@
-package com.cof;
+package com.cof.utils;
 
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;

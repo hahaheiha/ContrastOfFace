@@ -1,5 +1,5 @@
 
-package com.cof.baidu;
+package com.cof.utils.baidu;
 
 import org.json.JSONObject;
 

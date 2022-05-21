@@ -1,4 +1,4 @@
-package com.cof.baidu;
+package com.cof.utils.baidu;
 
 /**
  * Base64 工具类

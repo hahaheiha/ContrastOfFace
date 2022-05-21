@@ -1,4 +1,4 @@
-package com.cof;
+package com.cof.utils;
 
 import android.content.Context;
 import android.database.sqlite.SQLiteDatabase;
