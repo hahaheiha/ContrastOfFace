@@ -24,7 +24,6 @@ import androidx.recyclerview.widget.RecyclerView;
 import com.cof.utils.BitmapUtil;
 import com.cof.utils.DatabaseHelper;
 import com.google.android.material.floatingactionbutton.FloatingActionButton;
-import com.jinian.test1.R;
 
 import java.io.FileNotFoundException;
 import java.util.ArrayList;

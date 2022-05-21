@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
-    package="com.jinian.test1">
+    package="com.cof">
 
     <uses-permission android:name="android.permission.ACCESS_WIFI_STATE" />
     <uses-permission android:name="android.permission.INTERNET" />
@@ -13,7 +13,7 @@
         android:label="@string/app_name"
         android:roundIcon="@mipmap/ic_launcher_round"
         android:supportsRtl="true"
-        android:theme="@style/Theme.JinianTest1"
+        android:theme="@style/Theme.COF"
         android:requestLegacyExternalStorage="true">
         <activity
             android:name=".ExpressionActivity"
@@ -24,7 +24,7 @@
 
         <provider
             android:name="androidx.core.content.FileProvider"
-            android:authorities="com.jinian.test1.fileprovider"
+            android:authorities="com.cof.fileprovider"
             android:exported="false"
             android:grantUriPermissions="true">
             <meta-data

@@ -35,7 +35,6 @@ import com.cof.utils.baidu.Base64Util;
 import com.cof.utils.baidu.GsonUtils;
 import com.cof.utils.baidu.HttpUtil;
 import com.google.android.material.floatingactionbutton.FloatingActionButton;
-import com.jinian.test1.R;
 
 import java.io.File;
 import java.io.FileNotFoundException;
@@ -60,8 +59,8 @@ public class MainActivity extends AppCompatActivity {
     private ImageView resultImage;
     private TextView saveText;
 
-    byte[] templateImgBytes = null;
-    byte[] mergeImgBytes = null;
+    private byte[] templateImgBytes = null;
+    private byte[] mergeImgBytes = null;
 
 
     private boolean isVisible;
@@ -75,9 +74,6 @@ public class MainActivity extends AppCompatActivity {
     private Bitmap chosenImageLeftBitmap;
     private Bitmap resultMergeBitmap;
 
-//    private String accessToken;
-
-    private String resultData = null;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {

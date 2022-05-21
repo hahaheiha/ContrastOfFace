@@ -6,7 +6,8 @@ import android.os.Bundle;
 
 import androidx.annotation.NonNull;
 
-import com.jinian.test1.R;
+import com.cof.R;
+
 
 public class CustomerDialog extends Dialog{
 

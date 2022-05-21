@@ -17,13 +17,15 @@ import android.widget.Toast;
 import androidx.annotation.NonNull;
 import androidx.recyclerview.widget.RecyclerView;
 
-import com.jinian.test1.ExpressionActivity;
-import com.jinian.test1.MainActivity;
-import com.jinian.test1.R;
-import com.jinian.test1.utils.BitmapUtil;
-import com.jinian.test1.utils.CustomerDialog;
-import com.jinian.test1.utils.DatabaseHelper;
-import com.jinian.test1.utils.ShowBigPhoto;
+
+import com.cof.ExpressionActivity;
+import com.cof.MainActivity;
+import com.cof.R;
+import com.cof.utils.BitmapUtil;
+import com.cof.utils.CustomerDialog;
+import com.cof.utils.DatabaseHelper;
+import com.cof.utils.ShowBigPhoto;
+
 
 import java.util.ArrayList;
 import java.util.List;

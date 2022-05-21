@@ -15,7 +15,7 @@
             android:id="@+id/collapsingToolbar"
             android:layout_width="match_parent"
             android:layout_height="match_parent"
-            android:theme="@style/Theme.JinianTest1"
+            android:theme="@style/Theme.COF"
             app:contentScrim="@color/blue"
             app:layout_scrollFlags="scroll|exitUntilCollapsed" >
 
@@ -99,6 +99,7 @@
                 android:layout_height="wrap_content"
                 android:layout_gravity="center"
                 android:layout_marginTop="10dp"
+                android:textSize="24sp"
                 android:gravity="center" />
 
             <com.google.android.material.card.MaterialCardView

@@ -4,7 +4,8 @@ import android.app.Dialog;
 import android.content.Context;
 import android.os.Bundle;
 
-import com.jinian.test1.R;
+import com.cof.R;
+
 
 public class ShowBigPhoto extends Dialog {
     private Context context;
