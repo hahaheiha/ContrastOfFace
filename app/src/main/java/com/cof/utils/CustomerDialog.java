@@ -28,7 +28,7 @@ public class CustomerDialog extends Dialog{
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
-    super.onCreate(savedInstanceState);
-    //this.setContentView(R.layout.logout_dialog);
+        super.onCreate(savedInstanceState);
+        //this.setContentView(R.layout.logout_dialog);
     }
 }

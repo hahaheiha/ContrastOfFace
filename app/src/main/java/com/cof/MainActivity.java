@@ -20,6 +20,7 @@ import android.os.ParcelFileDescriptor;
 import android.view.View;
 import android.widget.Button;
 import android.widget.ImageView;
+import android.widget.ProgressBar;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -65,7 +66,10 @@ public class MainActivity extends AppCompatActivity {
     public static final int CHOOSE_PHOTO = 2;
     private ImageView chosenImageRight;
     private ImageView chosenImageLeft;
+    private ImageView bottomImage;
 //    private ImageView resultImage;
+
+    private ProgressBar progressBar;
     private TextView loading;
 
     private byte[] templateImgBytes = null;
@@ -80,7 +84,7 @@ public class MainActivity extends AppCompatActivity {
     private Button startButton;
     private FloatingActionButton addImage;
 
-    private Bitmap chosenImageRightBitmap;
+    private Bitmap chosenImageRightBitmap = null;
     private HashMap<String, String> stuInfo = new HashMap<>();
 
     private LinkedHashMap<Integer, String> dbImages;
@@ -116,7 +120,7 @@ public class MainActivity extends AppCompatActivity {
             TextView dialogTextRight = (TextView) dialog.findViewById(R.id.dialog_text_right);
             TextView dialogTextLeft = (TextView) dialog.findViewById(R.id.dialog_text_left);
 
-            dialogTextLeft.setVisibility(View.INVISIBLE);
+            dialogTextLeft.setVisibility(View.GONE);
             dialogTextRight.setText("我知道了");
             dialogTextRight.setOnClickListener(new View.OnClickListener() {
                 @Override
@@ -134,17 +138,22 @@ public class MainActivity extends AppCompatActivity {
 
         chosenImageRight = (ImageView) findViewById(R.id.chosenImageRight);
         chosenImageLeft = (ImageView) findViewById(R.id.chosenImageLeft);
+        bottomImage = (ImageView) findViewById(R.id.bottomDefault);
 //        resultImage = (ImageView) findViewById(R.id.resultImage);
+
+        progressBar = (ProgressBar) findViewById(R.id.progress);
         loading = (TextView) findViewById(R.id.loading);
+
+
 
         addImage =  (FloatingActionButton) findViewById(R.id.floatingButtonCenter);
         rightAddButton = (Button) findViewById(R.id.addRight);
         leftAddButton = (Button) findViewById(R.id.addLeft);
         startButton = (Button) findViewById(R.id.startButton);
 
-        startButton.setVisibility(View.INVISIBLE);
-        rightAddButton.setVisibility(View.INVISIBLE);
-        leftAddButton.setVisibility(View.INVISIBLE);
+        startButton.setVisibility(View.GONE);
+        rightAddButton.setVisibility(View.GONE);
+        leftAddButton.setVisibility(View.GONE);
 
         SharedPreferences pref = getSharedPreferences("isTip", MODE_PRIVATE);
         isShowAgain = pref.getBoolean("isShowAgain", true);
@@ -177,13 +186,14 @@ public class MainActivity extends AppCompatActivity {
                     dialog.dismiss();
                 }
             });
-            dialogTitle.setText("用户须知：");
-            dialogInfo.setText("请确保上传的图片存在人脸。\n上传的模板图和人脸图的文件大小不超过 2 MB。\n" +
-                    "上传的图片应为 JPG/JPEG 格式。\n暂不支持黑白照片。\n--开始使用吧--");
+            dialogTitle.setText("使用须知：");
+            dialogInfo.setText("请确保上传的图片存在人脸。\n上传的图片尺寸在1920x1080以下。");
 
         }
 
-        sInfo.setVisibility(View.INVISIBLE);
+        sInfo.setVisibility(View.GONE);
+        loading.setVisibility(View.GONE);
+        progressBar.setVisibility(View.GONE);
 
         addImage.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -197,9 +207,9 @@ public class MainActivity extends AppCompatActivity {
 
                 }
                 else {
-                    rightAddButton.setVisibility(View.INVISIBLE);
-                    leftAddButton.setVisibility(View.INVISIBLE);
-                    startButton.setVisibility(View.INVISIBLE);
+                    rightAddButton.setVisibility(View.GONE);
+                    leftAddButton.setVisibility(View.GONE);
+                    startButton.setVisibility(View.GONE);
                     addImage.setImageResource(R.drawable.ic_and);
                     isVisible = false;
                 }
@@ -266,8 +276,15 @@ public class MainActivity extends AppCompatActivity {
         startButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                sInfo.setVisibility(View.INVISIBLE);
+                rightAddButton.setVisibility(View.GONE);
+                leftAddButton.setVisibility(View.GONE);
+                startButton.setVisibility(View.GONE);
+                addImage.setImageResource(R.drawable.ic_and);
+                isVisible = false;
+                sInfo.setVisibility(View.GONE);
+                bottomImage.setVisibility(View.GONE);
                 loading.setVisibility(View.VISIBLE);
+                progressBar.setVisibility(View.VISIBLE);
                 faceMatch();
             }
         });
@@ -350,7 +367,9 @@ public class MainActivity extends AppCompatActivity {
                 Bitmap target = BitmapUtil.stringtoBitmap(dbImages.get(maxLikeImgId));
                 chosenImageLeft.setImageBitmap(target);
 
-                loading.setVisibility(View.INVISIBLE);
+                loading.setVisibility(View.GONE);
+                progressBar.setVisibility(View.GONE);
+                bottomImage.setVisibility(View.GONE);
                 sInfo.setVisibility(View.VISIBLE);
 
                 TextView likeDegree = (TextView) findViewById(R.id.likeDegree);
@@ -365,8 +384,18 @@ public class MainActivity extends AppCompatActivity {
 
                 likeDegree.setText(maxLikeDegree + "%");
 
-                //TODO 根据相似程度分级
-                likeEva.setText("同一个人的可能性极高");
+                if (maxLikeDegree >= 85) {
+                    likeEva.setText("同一个人的可能性极高");
+                }
+                else if (maxLikeDegree >= 60) {
+                    likeEva.setText("同一个人的可能性较高");
+                }
+                else if (maxLikeDegree >= 40) {
+                    likeEva.setText("同一个人的可能性较低");
+                }
+                else {
+                    likeEva.setText("同一个人的可能性极低");
+                }
 
                 sno.setText(stuInfo.get("sno"));
                 sname.setText(stuInfo.get("sname"));
@@ -375,8 +404,6 @@ public class MainActivity extends AppCompatActivity {
                 sphone.setText(stuInfo.get("sphone"));
                 steacher.setText(stuInfo.get("steacher"));
                 stphone.setText(stuInfo.get("stphone"));
-
-
 
             }
         });
@@ -387,6 +414,26 @@ public class MainActivity extends AppCompatActivity {
 
         dbImages = ImageDataUtil.getDatabaseImage(this);
         iteratorDBImg = dbImages.entrySet().iterator();
+        Integer max = dbImages.size();
+
+        if (!iteratorDBImg.hasNext()) {
+            errorInfo("数据库为空");
+            return null;
+        }
+        else if (chosenImageRightBitmap == null) {
+            errorInfo("未设置需对比人脸");
+            return null;
+        }
+
+
+        runOnUiThread(new Runnable() {
+            @Override
+            public void run() {
+                loading.setText("正在对比中......");
+                progressBar.setMax(max);
+                progressBar.setProgress(0);
+            }
+        });
 
         new Thread(new Runnable() {
             @Override
@@ -395,6 +442,7 @@ public class MainActivity extends AppCompatActivity {
                 try {
 
                     String accessToken = AuthService.getAuth();
+                    Integer prog = 1;
 
                     while (iteratorDBImg.hasNext()) {
 
@@ -402,13 +450,7 @@ public class MainActivity extends AppCompatActivity {
 //            byte[] bytes = FileUtil.readFileByBytes("D:\\JavaProjects\\ContrastTestBaidu\\src\\main\\resources\\1.png");
                         String encode1 = next.getValue();
 
-                        runOnUiThread(new Runnable() {
-                            @Override
-                            public void run() {
-                                loading.setText("正在对比中......");
-                                chosenImageLeft.setImageBitmap(BitmapUtil.stringtoBitmap(next.getValue()));
-                            }
-                        });
+                        Integer finalProg = prog;
 
 
                         String encode2 = Base64Util.encode(rightImgBytes);
@@ -448,9 +490,21 @@ public class MainActivity extends AppCompatActivity {
                                 maxLikeImgId = next.getKey();
                                 maxLikeDegree = conResult.getScore().intValue();
                             }
+
+                            runOnUiThread(new Runnable() {
+                                @Override
+                                public void run() {
+                                    chosenImageLeft.setImageBitmap(BitmapUtil.stringtoBitmap(next.getValue()));
+                                    progressBar.setProgress(finalProg);
+                                }
+                            });
+
                         }
-
-
+                        else {
+                            errorInfo(resultMsg);
+                            return;
+                        }
+                        prog++;
                     }
 
                     showDialogResult();
@@ -460,9 +514,6 @@ public class MainActivity extends AppCompatActivity {
                 }
             }
         }).start();
-
-        // 请求url
-
 
         return null;
     }
@@ -521,34 +572,29 @@ public class MainActivity extends AppCompatActivity {
         return bitmap;
     }
 
+    private void errorInfo(ResultMsg resultMsg) {
 
-    private void errorInfo(String paramString) {
+        String errorMsg = resultMsg.getError_msg();
+        final Integer[] errorCode = {resultMsg.getError_code()};
 
         runOnUiThread(new Runnable() {
             @Override
             public void run() {
 
-                String info = "未知错误";
-                if (paramString.contains("NO_FACE_FOUND")) {
+                loading.setVisibility(View.GONE);
+                progressBar.setVisibility(View.GONE);
+                sInfo.setVisibility(View.GONE);
+                bottomImage.setVisibility(View.VISIBLE);
+
+                String info = null;
+                if (errorCode[0] == 222202) {
                     info = "存在图片未检测到人脸。";
                 }
-                else if (paramString.contains("IMAGE_FILE_TOO_LARGE")) {
-                    info = "存在上传的图像文件太大。\n要求图片文件大小不超过 2 MB";
+                else if (errorCode[0] == 222304) {
+                    info = "存在上传的图像文件太大。\n请确保图片尺寸在1920x1080以下。";
                 }
-                else if (paramString.contains("IMAGE_ERROR_UNSUPPORTED_FORMAT")) {
-                    info = "存在图像无法正确解析，有可能不是一个图像文件、或有数据破损。\n导致原因可能为：图片格式不为 JPEG/JPG 格式";
-                }
-                else if (paramString.contains("INVALID_IMAGE_SIZE")) {
-                    info = "存在上传的图像像素尺寸太大或太小。\n最小200*200像素，最大4096*4096像素.";
-                }
-                else if (paramString.contains("BAD_FACE")) {
-                    info = "上传的图片人脸不符合要求。\n可能情况: 只有半张脸。";
-                }
-                else if (paramString.contains("INVALID_RECTANGLE")) {
-                    info = "存在传入的人脸框格式不符合要求，或者人脸框位于图片外。";
-                }
-                else if (paramString.contains("IMAGE_DOWNLOAD_TIMEOUT")) {
-                    info = "下载图片超时。";
+                else {
+                    info = "ERROR CODE: " + errorCode + "\n" + "ERROR MSG: " + errorMsg;
                 }
 
                 Dialog dialog = new CustomerDialog(MainActivity.this, R.style.Dialog, R.layout.dialog);
@@ -566,7 +612,49 @@ public class MainActivity extends AppCompatActivity {
                         dialog.dismiss();
                     }
                 });
-                dialogTextLeft.setVisibility(View.INVISIBLE);
+                dialogTextLeft.setVisibility(View.GONE);
+
+                dialogTitle.setText("错误信息");
+                dialogInfo.setText(info);
+            }
+        });
+
+    }
+
+    private void errorInfo(String paramString) {
+
+        runOnUiThread(new Runnable() {
+            @Override
+            public void run() {
+                loading.setVisibility(View.GONE);
+                progressBar.setVisibility(View.GONE);
+                sInfo.setVisibility(View.GONE);
+                bottomImage.setVisibility(View.VISIBLE);
+
+                String info = null;
+                if (paramString.equals("数据库为空")) {
+                    info = "人脸数据库为空！\n请添加学生人脸至数据库中再进行对比！";
+                }
+                else if (paramString.equals("未设置需对比人脸")) {
+                    info = "未设置需对比人脸！\n请设置需要对比的人脸！";
+                }
+
+                Dialog dialog = new CustomerDialog(MainActivity.this, R.style.Dialog, R.layout.dialog);
+                dialog.setCanceledOnTouchOutside(false);
+                dialog.show();
+
+                TextView dialogTitle = (TextView) dialog.findViewById(R.id.dialog_title);
+                TextView dialogInfo = (TextView) dialog.findViewById(R.id.dialog_info);
+                TextView dialogTextRight = (TextView) dialog.findViewById(R.id.dialog_text_right);
+                TextView dialogTextLeft = (TextView) dialog.findViewById(R.id.dialog_text_left);
+                dialogTextRight.setText("我知道了");
+                dialogTextRight.setOnClickListener(new View.OnClickListener() {
+                    @Override
+                    public void onClick(View v) {
+                        dialog.dismiss();
+                    }
+                });
+                dialogTextLeft.setVisibility(View.GONE);
 
                 dialogTitle.setText("错误信息");
                 dialogInfo.setText(info);

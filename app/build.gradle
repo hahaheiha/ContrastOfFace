@@ -30,11 +30,11 @@ android {
 
 dependencies {
     implementation 'com.google.code.gson:gson:2.9.0'
-    implementation group: 'com.github.bumptech.glide', name: 'glide', version: '4.9.0'
+//    implementation group: 'com.github.bumptech.glide', name: 'glide', version: '4.9.0'
     implementation 'androidx.recyclerview:recyclerview:1.0.0'
-    implementation group: 'com.alibaba', name: 'fastjson', version: '1.2.75'
-    implementation group: 'com.squareup.okhttp3', name: 'okhttp', version: '4.9.0'
-    implementation group: 'com.squareup.okio', name: 'okio', version: '2.2.2'
+//    implementation group: 'com.alibaba', name: 'fastjson', version: '1.2.75'
+//    implementation group: 'com.squareup.okhttp3', name: 'okhttp', version: '4.9.0'
+//    implementation group: 'com.squareup.okio', name: 'okio', version: '2.2.2'
     implementation 'androidx.appcompat:appcompat:1.1.0'
     implementation 'com.google.android.material:material:1.1.0'
     implementation 'androidx.constraintlayout:constraintlayout:1.1.3'

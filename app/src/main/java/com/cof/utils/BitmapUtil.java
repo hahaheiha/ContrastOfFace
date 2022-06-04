@@ -64,7 +64,7 @@ public class BitmapUtil {
         return baos.toByteArray();
     }
 
-    public static byte[] File2byte(String filePath) {
+    public static byte[] fileToByte(String filePath) {
         byte[] buffer = null;
         try {
             File file = new File(filePath);
@@ -86,7 +86,7 @@ public class BitmapUtil {
         return buffer;
     }
 
-    public static void byte2File(byte[] buf, String filePath) {
+    public static void byteToFile(byte[] buf, String filePath) {
         BufferedOutputStream bos = null;
         FileOutputStream fos = null;
         File file;
