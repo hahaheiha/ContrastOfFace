@@ -56,12 +56,10 @@ public class MainActivity extends AppCompatActivity {
     private ImageView chosenImageRight;
     private ImageView chosenImageLeft;
     private ImageView bottomImage;
-//    private ImageView resultImage;
 
     private ProgressBar progressBar;
     private TextView loading;
 
-    private byte[] templateImgBytes = null;
     private byte[] rightImgBytes = null;
 
 
@@ -80,8 +78,6 @@ public class MainActivity extends AppCompatActivity {
 
     private Integer maxLikeImgId = 0;
     private Integer maxLikeDegree = -1;
-    private String maxLikeImgBase64 = null;
-
 
     Iterator<Map.Entry<Integer, String>> iteratorDBImg;
 
@@ -117,7 +113,7 @@ public class MainActivity extends AppCompatActivity {
                     dialog.dismiss();
                 }
             });
-            dialogTitle.setText("联网失败：");
+            dialogTitle.setText("联网失败");
             dialogInfo.setText("网络连接失败，请检查网络连接是否正常。");
         }
 
