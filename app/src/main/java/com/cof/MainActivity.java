@@ -14,8 +14,6 @@ import android.net.ConnectivityManager;
 import android.net.NetworkInfo;
 import android.net.Uri;
 import android.os.Bundle;
-import android.os.Environment;
-import android.os.Handler;
 import android.os.ParcelFileDescriptor;
 import android.view.View;
 import android.widget.Button;
@@ -42,24 +40,15 @@ import com.cof.utils.baidu.HttpUtil;
 import com.google.android.material.card.MaterialCardView;
 import com.google.android.material.floatingactionbutton.FloatingActionButton;
 
-import java.io.File;
 import java.io.FileNotFoundException;
-import java.io.FileOutputStream;
-import java.io.IOException;
-import java.text.DateFormat;
-import java.text.SimpleDateFormat;
 import java.util.ArrayList;
-import java.util.Date;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.LinkedHashMap;
 import java.util.Map;
-import java.util.Set;
-import java.util.Timer;
-import java.util.TimerTask;
 
-import entity.Result;
-import entity.ResultMsg;
+import com.cof.entity.Result;
+import com.cof.entity.ResultMsg;
 
 public class MainActivity extends AppCompatActivity {
 

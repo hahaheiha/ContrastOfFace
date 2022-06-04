@@ -10,9 +10,7 @@ import android.graphics.BitmapFactory;
 import android.net.Uri;
 import android.os.Bundle;
 import android.os.ParcelFileDescriptor;
-import android.text.Editable;
 import android.view.View;
-import android.view.WindowManager;
 import android.widget.ImageView;
 import android.widget.TextView;
 import android.widget.Toast;
@@ -35,8 +33,8 @@ import java.io.FileNotFoundException;
 import java.util.ArrayList;
 import java.util.List;
 
-import adapter.ExpressionAdapter;
-import entity.Expression;
+import com.cof.adapter.ExpressionAdapter;
+import com.cof.entity.Expression;
 
 public class ExpressionActivity extends AppCompatActivity {
 
@@ -94,7 +92,7 @@ public class ExpressionActivity extends AppCompatActivity {
         switch (requestCode) {
             case CHOOSE_PHOTO:
                 if (resultCode == RESULT_OK) {
-//                    int position = adapter.getItemCount();
+//                    int position = com.cof.adapter.getItemCount();
 
 
                     Uri uri = data.getData();

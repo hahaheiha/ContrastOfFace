@@ -1,4 +1,4 @@
-package adapter;
+package com.cof.adapter;
 
 import android.app.Dialog;
 import android.content.Context;
@@ -30,7 +30,7 @@ import com.cof.utils.ShowBigPhoto;
 import java.util.ArrayList;
 import java.util.List;
 
-import entity.Expression;
+import com.cof.entity.Expression;
 
 public class ExpressionAdapter extends RecyclerView.Adapter<ExpressionAdapter.ViewHolder> {
 

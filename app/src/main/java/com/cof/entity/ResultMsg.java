@@ -1,4 +1,4 @@
-package entity;
+package com.cof.entity;
 
 
 public class ResultMsg {

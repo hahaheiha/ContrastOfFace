@@ -1,4 +1,4 @@
-package entity;
+package com.cof.entity;
 
 import java.util.ArrayList;
 import java.util.HashMap;
