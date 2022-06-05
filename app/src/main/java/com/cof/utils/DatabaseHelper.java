@@ -43,36 +43,9 @@ public class DatabaseHelper extends SQLiteOpenHelper {
     @Override
     public void onCreate(SQLiteDatabase db) {
         db.execSQL(CREATE_IMAGEDB);
-//        HashMap<String, Integer> expMap = DatabaseUtil.getExpMap();
-//        HashMap<String, String> imageMap = DatabaseUtil.getDefaultImageMap();
-//
-//        ContentValues values = new ContentValues();
-//
-//        for (Map.Entry<String, String> entry : imageMap.entrySet()) {
-//            values.clear();
-////            String name = entry.getKey();
-//            String base64 = entry.getValue();
-////            values.put("name", name);
-//            values.put("base64", base64);
-//            db.insert("imagedb", null, values);
-//        }
     }
 
     @Override
     public void onUpgrade(SQLiteDatabase db, int oldVersion, int newVersion) {
-//        HashMap<String, Integer> expMap = ExpressionActivity.getExpMap();
-//        HashMap<String, String> imageMap = DefaultImageBase64.getDefaultImageMap();
-//
-//        ContentValues values = new ContentValues();
-//        for (Map.Entry<String, Integer> entrySet : expMap.entrySet()) {
-//            values.clear();
-//            String name = entrySet.getKey();
-//            Integer imageid = entrySet.getValue();
-//            String base64 = imageMap.get(name);
-//            values.put("imageid", imageid);
-//            values.put("name", name);
-//            values.put("base64", base64);
-//            db.insert("imagedb", null, values);
-//        }
     }
 }
