@@ -26,8 +26,6 @@ import com.cof.utils.CustomerDialog;
 import com.cof.utils.DatabaseHelper;
 import com.cof.utils.ShowBigPhoto;
 
-
-import java.util.ArrayList;
 import java.util.List;
 
 import com.cof.entity.StuFace;
@@ -35,30 +33,39 @@ import com.cof.entity.StuFace;
 public class StuFaceAdapter extends RecyclerView.Adapter<StuFaceAdapter.ViewHolder> {
 
     private List<StuFace> mStuList;
-//    private static DatabaseHelper dbHelper;
     private SQLiteDatabase db;
     private Context mContext;
-    private ArrayList<Integer> deletePositionList;
 
+    /**
+     * 自定义类 ViewHolder，来减少 findViewById() 的使用
+     */
     static class ViewHolder extends RecyclerView.ViewHolder {
         View stuView;
         ImageView stuImage;
-//        TextView expName;
 
         public ViewHolder(View view) {
             super(view);
             stuView = view;
             stuImage = (ImageView) view.findViewById(R.id.stuImage);
-//            expName = (TextView) view.findViewById(R.id.expName);
-
         }
 
     }
 
+    /**
+     * 构造函数
+     * @param stuList
+     */
     public StuFaceAdapter(List<StuFace> stuList) {
         mStuList = stuList;
     }
 
+    /**
+     * 得到数据库中学生的数据，为ImageView设置点击事件：查看｜删除
+     * 并加载每个view的布局
+     * @param parent
+     * @param viewType
+     * @return
+     */
     @NonNull
     @Override
     public ViewHolder onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {
@@ -68,23 +75,10 @@ public class StuFaceAdapter extends RecyclerView.Adapter<StuFaceAdapter.ViewHold
         if (mContext == null) {
             mContext = parent.getContext();
         }
-        deletePositionList = new ArrayList<>();
 
         View view = LayoutInflater.from(parent.getContext()).inflate(R.layout.stu_face_item, parent, false);
         final ViewHolder holder = new ViewHolder(view);
 
-        holder.stuView.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                int position = holder.getAdapterPosition();
-                StuFace stu = mStuList.get(position);
-                Intent intent = new Intent(parent.getContext(), MainActivity.class);
-//                intent.putExtra(ExpressionActivity.EXP_NAME, stu.getImgName());
-                intent.putExtra(StuFaceActivity.STU_IMAGE_ID, stu.getImageId());
-//                mContext.startActivity(intent);
-                parent.getContext().startActivity(intent);
-            }
-        });
         holder.stuImage.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
@@ -177,6 +171,12 @@ public class StuFaceAdapter extends RecyclerView.Adapter<StuFaceAdapter.ViewHold
         });
         return holder;
     }
+
+    /**
+     * 设置每个ViewHolder中学生的图片
+     * @param holder
+     * @param position
+     */
     @Override
     public void onBindViewHolder(@NonNull ViewHolder holder, int position) {
         if (db == null) return;
@@ -196,6 +196,10 @@ public class StuFaceAdapter extends RecyclerView.Adapter<StuFaceAdapter.ViewHold
         }
     }
 
+    /**
+     * 获取item数量
+     * @return
+     */
     @Override
     public int getItemCount() {
         return mStuList.size();
