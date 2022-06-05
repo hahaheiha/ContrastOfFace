@@ -18,7 +18,7 @@ import androidx.annotation.NonNull;
 import androidx.recyclerview.widget.RecyclerView;
 
 
-import com.cof.ExpressionActivity;
+import com.cof.StuFaceActivity;
 import com.cof.MainActivity;
 import com.cof.R;
 import com.cof.utils.BitmapUtil;
@@ -30,33 +30,33 @@ import com.cof.utils.ShowBigPhoto;
 import java.util.ArrayList;
 import java.util.List;
 
-import com.cof.entity.Expression;
+import com.cof.entity.StuFace;
 
-public class ExpressionAdapter extends RecyclerView.Adapter<ExpressionAdapter.ViewHolder> {
+public class StuFaceAdapter extends RecyclerView.Adapter<StuFaceAdapter.ViewHolder> {
 
-    private List<Expression> mExpList;
+    private List<StuFace> mStuList;
 //    private static DatabaseHelper dbHelper;
     private SQLiteDatabase db;
     private Context mContext;
     private ArrayList<Integer> deletePositionList;
 
     static class ViewHolder extends RecyclerView.ViewHolder {
-        View expView;
-        ImageView expImage;
-        TextView expName;
+        View stuView;
+        ImageView stuImage;
+//        TextView expName;
 
         public ViewHolder(View view) {
             super(view);
-            expView = view;
-            expImage = (ImageView) view.findViewById(R.id.expImage);
+            stuView = view;
+            stuImage = (ImageView) view.findViewById(R.id.stuImage);
 //            expName = (TextView) view.findViewById(R.id.expName);
 
         }
 
     }
 
-    public ExpressionAdapter(List<Expression> expList) {
-        mExpList = expList;
+    public StuFaceAdapter(List<StuFace> stuList) {
+        mStuList = stuList;
     }
 
     @NonNull
@@ -70,28 +70,28 @@ public class ExpressionAdapter extends RecyclerView.Adapter<ExpressionAdapter.Vi
         }
         deletePositionList = new ArrayList<>();
 
-        View view = LayoutInflater.from(parent.getContext()).inflate(R.layout.exp_item, parent, false);
+        View view = LayoutInflater.from(parent.getContext()).inflate(R.layout.stu_face_item, parent, false);
         final ViewHolder holder = new ViewHolder(view);
 
-        holder.expView.setOnClickListener(new View.OnClickListener() {
+        holder.stuView.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
                 int position = holder.getAdapterPosition();
-                Expression exp = mExpList.get(position);
+                StuFace stu = mStuList.get(position);
                 Intent intent = new Intent(parent.getContext(), MainActivity.class);
-//                intent.putExtra(ExpressionActivity.EXP_NAME, exp.getImgName());
-                intent.putExtra(ExpressionActivity.EXP_IMAGE_ID, exp.getImageId());
+//                intent.putExtra(ExpressionActivity.EXP_NAME, stu.getImgName());
+                intent.putExtra(StuFaceActivity.STU_IMAGE_ID, stu.getImageId());
 //                mContext.startActivity(intent);
                 parent.getContext().startActivity(intent);
             }
         });
-        holder.expImage.setOnClickListener(new View.OnClickListener() {
+        holder.stuImage.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
                 int position = holder.getAdapterPosition();
-                Expression exp = mExpList.get(position);
+                StuFace stu = mStuList.get(position);
                 Bitmap bitmap = null;
-                Cursor cursor = db.rawQuery("select base64 from imagedb where imageid = ?", new String[]{exp.getImageId() + ""});
+                Cursor cursor = db.rawQuery("select base64 from imagedb where imageid = ?", new String[]{stu.getImageId() + ""});
                 if (cursor.moveToFirst()) {
                     String base64 = cursor.getString(cursor.getColumnIndex("base64"));
                     bitmap = BitmapUtil.stringtoBitmap(base64);
@@ -133,12 +133,12 @@ public class ExpressionAdapter extends RecyclerView.Adapter<ExpressionAdapter.Vi
 
             }
         });
-        holder.expImage.setOnLongClickListener(new View.OnLongClickListener() {
+        holder.stuImage.setOnLongClickListener(new View.OnLongClickListener() {
             @Override
             public boolean onLongClick(View v) {
                 int position = holder.getAdapterPosition();
-                Expression exp = mExpList.get(position);
-                int imageId = exp.getImageId();
+                StuFace stu = mStuList.get(position);
+                int imageId = stu.getImageId();
 
                 Dialog dialog = new CustomerDialog(mContext, R.style.Dialog, R.layout.dialog);
                 dialog.setCanceledOnTouchOutside(false);
@@ -162,7 +162,7 @@ public class ExpressionAdapter extends RecyclerView.Adapter<ExpressionAdapter.Vi
                     @Override
                     public void onClick(View v) {
                         db.execSQL("delete from imagedb where imageid = " + imageId);
-                        Intent intent = new Intent(mContext, ExpressionActivity.class);
+                        Intent intent = new Intent(mContext, StuFaceActivity.class);
                         intent.putExtra("deletePosition", position);
                         mContext.startActivity(intent);
                         Toast.makeText(mContext, "删除成功", Toast.LENGTH_SHORT).show();
@@ -181,24 +181,24 @@ public class ExpressionAdapter extends RecyclerView.Adapter<ExpressionAdapter.Vi
     public void onBindViewHolder(@NonNull ViewHolder holder, int position) {
         if (db == null) return;
 //        if (deletePositionList.contains(position) || )
-        Expression exp = mExpList.get(position);
-        int imageId = exp.getImageId();
+        StuFace stu = mStuList.get(position);
+        int imageId = stu.getImageId();
 //        Cursor query = db.query("imagedb", null, "where ? = " + imageId, new String[]{"imageid"}, null, null, null);
         Cursor cursor = db.rawQuery("select base64 from imagedb where imageid = ?", new String[]{imageId + ""});
         if (cursor.moveToFirst()) {
             String base64 = cursor.getString(cursor.getColumnIndex("base64"));
             Bitmap bitmap = BitmapUtil.stringtoBitmap(base64);
-            holder.expImage.setImageBitmap(bitmap);
-//            holder.expName.setText(exp.getImgName());
+            holder.stuImage.setImageBitmap(bitmap);
+//            holder.expName.setText(stu.getImgName());
         }
         else {
-            holder.expView.setVisibility(View.GONE);
+            holder.stuView.setVisibility(View.GONE);
         }
     }
 
     @Override
     public int getItemCount() {
-        return mExpList.size();
+        return mStuList.size();
     }
 
 }

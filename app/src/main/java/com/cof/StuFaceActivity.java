@@ -33,18 +33,18 @@ import java.io.FileNotFoundException;
 import java.util.ArrayList;
 import java.util.List;
 
-import com.cof.adapter.ExpressionAdapter;
-import com.cof.entity.Expression;
+import com.cof.adapter.StuFaceAdapter;
+import com.cof.entity.StuFace;
 
-public class ExpressionActivity extends AppCompatActivity {
+public class StuFaceActivity extends AppCompatActivity {
 
     private static final int CHOOSE_PHOTO = 1;
 
-    public static final String EXP_IMAGE_ID = "exp_image_id";
+    public static final String STU_IMAGE_ID = "stu_image_id";
 
 
-    private List<Expression> expList = new ArrayList<>();
-    private ExpressionAdapter adapter;
+    private List<StuFace> stuList = new ArrayList<>();
+    private StuFaceAdapter adapter;
 
     RecyclerView recyclerView;
 
@@ -52,28 +52,29 @@ public class ExpressionActivity extends AppCompatActivity {
     private SQLiteDatabase db;
 
 
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        setContentView(R.layout.activity_expression);
+        setContentView(R.layout.activity_stu_face);
 
 
         dbHelper = DatabaseHelper.getInstance(this);
         db = dbHelper.getWritableDatabase();
-        buildExpList();
+        buildStuList();
 
         recyclerView = (RecyclerView) findViewById(R.id.recyclerView);
         GridLayoutManager layoutManager = new GridLayoutManager(this, 2);
         recyclerView.setLayoutManager(layoutManager);
-        adapter = new ExpressionAdapter(expList);
+        adapter = new StuFaceAdapter(stuList);
         recyclerView.setAdapter(adapter);
         FloatingActionButton selfAdd = (FloatingActionButton) findViewById(R.id.selfAdd);
         selfAdd.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                if (ContextCompat.checkSelfPermission(ExpressionActivity.this, Manifest.permission.WRITE_EXTERNAL_STORAGE) !=
+                if (ContextCompat.checkSelfPermission(StuFaceActivity.this, Manifest.permission.WRITE_EXTERNAL_STORAGE) !=
                     PackageManager.PERMISSION_GRANTED) {
-                    ActivityCompat.requestPermissions(ExpressionActivity.this, new String[] {Manifest.permission.WRITE_EXTERNAL_STORAGE}, 1);
+                    ActivityCompat.requestPermissions(StuFaceActivity.this, new String[] {Manifest.permission.WRITE_EXTERNAL_STORAGE}, 1);
                 }
                 else {
                     openAlbum();
@@ -86,14 +87,20 @@ public class ExpressionActivity extends AppCompatActivity {
 
     }
 
+    /**
+     * 从相册获取图片的URI并转化为Bitmap
+     * 并弹出输入框，录入学生信息
+     * 点击确认时将学生信息及照片添加至数据库中
+     * @param requestCode
+     * @param resultCode
+     * @param data
+     */
     @Override
     protected void onActivityResult(int requestCode, int resultCode, @Nullable Intent data) {
         super.onActivityResult(requestCode, resultCode, data);
         switch (requestCode) {
             case CHOOSE_PHOTO:
                 if (resultCode == RESULT_OK) {
-//                    int position = com.cof.adapter.getItemCount();
-
 
                     Uri uri = data.getData();
                     Bitmap bitmap = getBitmapFromUri(uri);
@@ -142,11 +149,11 @@ public class ExpressionActivity extends AppCompatActivity {
                             if (cursor.moveToFirst()) {
                                 imageId = cursor.getInt(cursor.getColumnIndex("imageid"));
                             }
-                            expList.add(0, new Expression(imageId));
+                            stuList.add(0, new StuFace(imageId));
                             adapter.notifyItemInserted(0);
                             recyclerView.getLayoutManager().scrollToPosition(0);
                             inputDialog.dismiss();
-                            Toast.makeText(ExpressionActivity.this, "添加成功", Toast.LENGTH_SHORT).show();
+                            Toast.makeText(StuFaceActivity.this, "添加成功", Toast.LENGTH_SHORT).show();
 
                         }
                     });
@@ -155,7 +162,7 @@ public class ExpressionActivity extends AppCompatActivity {
                         @Override
                         public void onClick(View v) {
                             inputDialog.dismiss();
-                            Toast.makeText(ExpressionActivity.this, "取消添加", Toast.LENGTH_SHORT).show();
+                            Toast.makeText(StuFaceActivity.this, "取消添加", Toast.LENGTH_SHORT).show();
                         }
                     });
 
@@ -163,7 +170,9 @@ public class ExpressionActivity extends AppCompatActivity {
         }
     }
 
-
+    /**
+     * 打开相册
+     */
     private void openAlbum() {
 //        Intent intent = new Intent("android.intent.action.GET_CONTENT");
         Intent intent = new Intent(Intent.ACTION_OPEN_DOCUMENT);
@@ -172,6 +181,12 @@ public class ExpressionActivity extends AppCompatActivity {
         startActivityForResult(intent, CHOOSE_PHOTO);
     }
 
+    /**
+     * 获取相册使用权限结果：同意｜拒绝
+     * @param requestCode
+     * @param permissions
+     * @param grantResults
+     */
     @Override
     public void onRequestPermissionsResult(int requestCode, @NonNull String[] permissions, @NonNull int[] grantResults) {
         switch (requestCode) {
@@ -187,6 +202,11 @@ public class ExpressionActivity extends AppCompatActivity {
 
     }
 
+    /**
+     * 通过从相册获取的图片的Uri，将图片转化为Bitmap
+     * @param uri
+     * @return
+     */
     private Bitmap getBitmapFromUri(Uri uri) {
         Bitmap bitmap = null;
         try {
@@ -199,27 +219,34 @@ public class ExpressionActivity extends AppCompatActivity {
         return bitmap;
     }
 
-    private void buildExpList() {
+    /**
+     * 获取数据库中所有学生的数据库中的id
+     */
+    private void buildStuList() {
         Cursor cursor = db.rawQuery("select imageid from imagedb", null);
-        expList.clear();
+        stuList.clear();
         if (cursor.moveToFirst()) {
             do {
 //                String name = cursor.getString(cursor.getColumnIndex("name"));
                 int imageid = cursor.getInt(cursor.getColumnIndex("imageid"));
-                expList.add(new Expression(imageid));
+                stuList.add(new StuFace(imageid));
             } while (cursor.moveToNext());
         }
     }
 
+    /**
+     * 当用户删除学生数据时，此方法可以刷新学生列表，得到删除后的布局
+     * @param intent
+     */
     @Override
     protected void onNewIntent(Intent intent) {
         super.onNewIntent(intent);
         setIntent(intent);
         int deletePosition;
         if ((deletePosition = intent.getIntExtra("deletePosition", -1)) != -1) {
-            expList.remove(deletePosition);
+            stuList.remove(deletePosition);
             adapter.notifyItemRemoved(deletePosition);
-            adapter.notifyItemRangeChanged(deletePosition, expList.size() - deletePosition);
+            adapter.notifyItemRangeChanged(deletePosition, stuList.size() - deletePosition);
         }
     }
 
