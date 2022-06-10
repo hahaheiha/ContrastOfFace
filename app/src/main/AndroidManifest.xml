@@ -16,7 +16,7 @@
         android:theme="@style/Theme.COF"
         android:requestLegacyExternalStorage="true">
         <activity
-            android:name=".ExpressionActivity"
+            android:name=".StuFaceActivity"
             android:launchMode="singleTask"
             >
 

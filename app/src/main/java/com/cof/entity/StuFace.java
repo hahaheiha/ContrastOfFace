@@ -1,10 +1,10 @@
 package com.cof.entity;
 
-public class Expression {
+public class StuFace {
 //    private String ImgName;
     private int imageId;
 
-    public Expression(int imageId) {
+    public StuFace(int imageId) {
 //        ImgName = imgName;
         this.imageId = imageId;
     }

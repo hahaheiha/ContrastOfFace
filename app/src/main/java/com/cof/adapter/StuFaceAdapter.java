@@ -18,7 +18,7 @@ import androidx.annotation.NonNull;
 import androidx.recyclerview.widget.RecyclerView;
 
 
-import com.cof.ExpressionActivity;
+import com.cof.StuFaceActivity;
 import com.cof.MainActivity;
 import com.cof.R;
 import com.cof.utils.BitmapUtil;
@@ -26,39 +26,46 @@ import com.cof.utils.CustomerDialog;
 import com.cof.utils.DatabaseHelper;
 import com.cof.utils.ShowBigPhoto;
 
-
-import java.util.ArrayList;
 import java.util.List;
 
-import com.cof.entity.Expression;
+import com.cof.entity.StuFace;
 
-public class ExpressionAdapter extends RecyclerView.Adapter<ExpressionAdapter.ViewHolder> {
+public class StuFaceAdapter extends RecyclerView.Adapter<StuFaceAdapter.ViewHolder> {
 
-    private List<Expression> mExpList;
-//    private static DatabaseHelper dbHelper;
+    private List<StuFace> mStuList;
     private SQLiteDatabase db;
     private Context mContext;
-    private ArrayList<Integer> deletePositionList;
 
+    /**
+     * 自定义类 ViewHolder，来减少 findViewById() 的使用
+     */
     static class ViewHolder extends RecyclerView.ViewHolder {
-        View expView;
-        ImageView expImage;
-        TextView expName;
+        View stuView;
+        ImageView stuImage;
 
         public ViewHolder(View view) {
             super(view);
-            expView = view;
-            expImage = (ImageView) view.findViewById(R.id.expImage);
-//            expName = (TextView) view.findViewById(R.id.expName);
-
+            stuView = view;
+            stuImage = (ImageView) view.findViewById(R.id.stuImage);
         }
 
     }
 
-    public ExpressionAdapter(List<Expression> expList) {
-        mExpList = expList;
+    /**
+     * 构造函数
+     * @param stuList
+     */
+    public StuFaceAdapter(List<StuFace> stuList) {
+        mStuList = stuList;
     }
 
+    /**
+     * 得到数据库中学生的数据，为ImageView设置点击事件：查看｜删除
+     * 并加载每个view的布局
+     * @param parent
+     * @param viewType
+     * @return
+     */
     @NonNull
     @Override
     public ViewHolder onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {
@@ -68,30 +75,17 @@ public class ExpressionAdapter extends RecyclerView.Adapter<ExpressionAdapter.Vi
         if (mContext == null) {
             mContext = parent.getContext();
         }
-        deletePositionList = new ArrayList<>();
 
-        View view = LayoutInflater.from(parent.getContext()).inflate(R.layout.exp_item, parent, false);
+        View view = LayoutInflater.from(parent.getContext()).inflate(R.layout.stu_face_item, parent, false);
         final ViewHolder holder = new ViewHolder(view);
 
-        holder.expView.setOnClickListener(new View.OnClickListener() {
+        holder.stuImage.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
                 int position = holder.getAdapterPosition();
-                Expression exp = mExpList.get(position);
-                Intent intent = new Intent(parent.getContext(), MainActivity.class);
-//                intent.putExtra(ExpressionActivity.EXP_NAME, exp.getImgName());
-                intent.putExtra(ExpressionActivity.EXP_IMAGE_ID, exp.getImageId());
-//                mContext.startActivity(intent);
-                parent.getContext().startActivity(intent);
-            }
-        });
-        holder.expImage.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                int position = holder.getAdapterPosition();
-                Expression exp = mExpList.get(position);
+                StuFace stu = mStuList.get(position);
                 Bitmap bitmap = null;
-                Cursor cursor = db.rawQuery("select base64 from imagedb where imageid = ?", new String[]{exp.getImageId() + ""});
+                Cursor cursor = db.rawQuery("select base64 from imagedb where imageid = ?", new String[]{stu.getImageId() + ""});
                 if (cursor.moveToFirst()) {
                     String base64 = cursor.getString(cursor.getColumnIndex("base64"));
                     bitmap = BitmapUtil.stringtoBitmap(base64);
@@ -133,12 +127,12 @@ public class ExpressionAdapter extends RecyclerView.Adapter<ExpressionAdapter.Vi
 
             }
         });
-        holder.expImage.setOnLongClickListener(new View.OnLongClickListener() {
+        holder.stuImage.setOnLongClickListener(new View.OnLongClickListener() {
             @Override
             public boolean onLongClick(View v) {
                 int position = holder.getAdapterPosition();
-                Expression exp = mExpList.get(position);
-                int imageId = exp.getImageId();
+                StuFace stu = mStuList.get(position);
+                int imageId = stu.getImageId();
 
                 Dialog dialog = new CustomerDialog(mContext, R.style.Dialog, R.layout.dialog);
                 dialog.setCanceledOnTouchOutside(false);
@@ -162,7 +156,7 @@ public class ExpressionAdapter extends RecyclerView.Adapter<ExpressionAdapter.Vi
                     @Override
                     public void onClick(View v) {
                         db.execSQL("delete from imagedb where imageid = " + imageId);
-                        Intent intent = new Intent(mContext, ExpressionActivity.class);
+                        Intent intent = new Intent(mContext, StuFaceActivity.class);
                         intent.putExtra("deletePosition", position);
                         mContext.startActivity(intent);
                         Toast.makeText(mContext, "删除成功", Toast.LENGTH_SHORT).show();
@@ -177,28 +171,38 @@ public class ExpressionAdapter extends RecyclerView.Adapter<ExpressionAdapter.Vi
         });
         return holder;
     }
+
+    /**
+     * 设置每个ViewHolder中学生的图片
+     * @param holder
+     * @param position
+     */
     @Override
     public void onBindViewHolder(@NonNull ViewHolder holder, int position) {
         if (db == null) return;
 //        if (deletePositionList.contains(position) || )
-        Expression exp = mExpList.get(position);
-        int imageId = exp.getImageId();
+        StuFace stu = mStuList.get(position);
+        int imageId = stu.getImageId();
 //        Cursor query = db.query("imagedb", null, "where ? = " + imageId, new String[]{"imageid"}, null, null, null);
         Cursor cursor = db.rawQuery("select base64 from imagedb where imageid = ?", new String[]{imageId + ""});
         if (cursor.moveToFirst()) {
             String base64 = cursor.getString(cursor.getColumnIndex("base64"));
             Bitmap bitmap = BitmapUtil.stringtoBitmap(base64);
-            holder.expImage.setImageBitmap(bitmap);
-//            holder.expName.setText(exp.getImgName());
+            holder.stuImage.setImageBitmap(bitmap);
+//            holder.expName.setText(stu.getImgName());
         }
         else {
-            holder.expView.setVisibility(View.GONE);
+            holder.stuView.setVisibility(View.GONE);
         }
     }
 
+    /**
+     * 获取item数量
+     * @return
+     */
     @Override
     public int getItemCount() {
-        return mExpList.size();
+        return mStuList.size();
     }
 
 }

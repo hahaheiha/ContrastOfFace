@@ -216,7 +216,7 @@ public class MainActivity extends AppCompatActivity {
         leftAddButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                Intent intent = new Intent(MainActivity.this, ExpressionActivity.class);
+                Intent intent = new Intent(MainActivity.this, StuFaceActivity.class);
                 startActivity(intent);
             }
         });
@@ -225,7 +225,7 @@ public class MainActivity extends AppCompatActivity {
         chosenImageLeft.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                Intent intent = new Intent(MainActivity.this, ExpressionActivity.class);
+                Intent intent = new Intent(MainActivity.this, StuFaceActivity.class);
                 startActivity(intent);
             }
         });
