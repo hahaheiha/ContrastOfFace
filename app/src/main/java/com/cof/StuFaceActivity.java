@@ -101,17 +101,14 @@ public class StuFaceActivity extends AppCompatActivity {
         switch (requestCode) {
             case CHOOSE_PHOTO:
                 if (resultCode == RESULT_OK) {
-
+                    //获取图片
                     Uri uri = data.getData();
                     Bitmap bitmap = getBitmapFromUri(uri);
-
                     CustomerDialog inputDialog = new CustomerDialog(this, R.style.Dialog, R.layout.input_dialog);
                     inputDialog.setCanceledOnTouchOutside(false);
                     inputDialog.show();
-
                     ImageView sPreview = (ImageView) inputDialog.findViewById(R.id.sPreview);
                     sPreview.setImageBitmap(bitmap);
-
                     TextInputEditText sNo = (TextInputEditText) inputDialog.findViewById(R.id.sNo);
                     TextInputEditText sName = (TextInputEditText) inputDialog.findViewById(R.id.sName);
                     TextInputEditText sGrade = (TextInputEditText) inputDialog.findViewById(R.id.sGrade);
@@ -119,18 +116,14 @@ public class StuFaceActivity extends AppCompatActivity {
                     TextInputEditText sPhone = (TextInputEditText) inputDialog.findViewById(R.id.sPhone);
                     TextInputEditText sTeacher = (TextInputEditText) inputDialog.findViewById(R.id.sTeacher);
                     TextInputEditText sTPhone = (TextInputEditText) inputDialog.findViewById(R.id.sTPhone);
-
                     TextView dCancel = (TextView) inputDialog.findViewById(R.id.dialog_cancel);
                     TextView dAssure = (TextView) inputDialog.findViewById(R.id.dialog_assure);
-
-
-
+                    //添加学生信息
                     dAssure.setOnClickListener(new View.OnClickListener() {
                         @Override
                         public void onClick(View v) {
-
+                            //获取用户输入的学生信息
                             String imageBase64 = BitmapUtil.bitmaptoString(bitmap);
-
                             String sno = sNo.getText().toString();
                             String sname = sName.getText().toString();
                             String sgrade = sGrade.getText().toString();
@@ -138,12 +131,9 @@ public class StuFaceActivity extends AppCompatActivity {
                             String sphone = sPhone.getText().toString();
                             String steacher = sTeacher.getText().toString();
                             String stphone = sTPhone.getText().toString();
-
+                            //插入到学生数据库中
                             db.execSQL("insert into imagedb(base64, sno, sname, sgrade, sroom, sphone, steacher, stphone) values(?,?,?,?,?,?,?,?)",
                                     new String[]{imageBase64, sno, sname, sgrade, sroom, sphone, steacher, stphone});
-
-//                            System.out.println(sno+ "|" + sname+ "|" + sgrade+ "|" + sroom+ "|" + sphone+ "|" + steacher+ "|" + stphone);
-
                             Cursor cursor = db.rawQuery("select imageid from imagedb order by imageid desc", null);
                             int imageId = 0;
                             if (cursor.moveToFirst()) {
@@ -154,7 +144,6 @@ public class StuFaceActivity extends AppCompatActivity {
                             recyclerView.getLayoutManager().scrollToPosition(0);
                             inputDialog.dismiss();
                             Toast.makeText(StuFaceActivity.this, "添加成功", Toast.LENGTH_SHORT).show();
-
                         }
                     });
 

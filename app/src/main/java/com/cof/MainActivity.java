@@ -121,7 +121,6 @@ public class MainActivity extends AppCompatActivity {
         chosenImageRight = (ImageView) findViewById(R.id.chosenImageRight);
         chosenImageLeft = (ImageView) findViewById(R.id.chosenImageLeft);
         bottomImage = (ImageView) findViewById(R.id.bottomDefault);
-//        resultImage = (ImageView) findViewById(R.id.resultImage);
 
         progressBar = (ProgressBar) findViewById(R.id.progress);
         loading = (TextView) findViewById(R.id.loading);
@@ -376,11 +375,11 @@ public class MainActivity extends AppCompatActivity {
 
     //开始进行人脸对比
     public void faceMatch() {
-
+        //获取数据库中的数据
         dbImages = ImageDataUtil.getDatabaseImage(this);
         iteratorDBImg = dbImages.entrySet().iterator();
         Integer max = dbImages.size();
-
+        //判断人脸数据库是否为空，如果为空则提示
         if (!iteratorDBImg.hasNext()) {
             errorInfo("数据库为空");
             return;
@@ -389,8 +388,7 @@ public class MainActivity extends AppCompatActivity {
             errorInfo("未设置需对比人脸");
             return;
         }
-
-
+        //更新主界面
         runOnUiThread(new Runnable() {
             @Override
             public void run() {
@@ -399,7 +397,7 @@ public class MainActivity extends AppCompatActivity {
                 progressBar.setProgress(0);
             }
         });
-
+        //开始对数据库中的人脸进行逐一对比
         new Thread(new Runnable() {
             @Override
             public void run() {
@@ -410,52 +408,33 @@ public class MainActivity extends AppCompatActivity {
                     Integer prog = 1;
 
                     while (iteratorDBImg.hasNext()) {
-
+                        //获取图片并发送请求
                         Map.Entry<Integer, String> next = iteratorDBImg.next();
-//            byte[] bytes = FileUtil.readFileByBytes("D:\\JavaProjects\\ContrastTestBaidu\\src\\main\\resources\\1.png");
                         String encode1 = next.getValue();
-
                         Integer finalProg = prog;
-
-
                         String encode2 = Base64Util.encode(rightImgBytes);
-
-
                         ArrayList<String> params = new ArrayList<>();
-
                         HashMap<String, String> map = new HashMap<>();
-
                         map.put("image", encode1);
                         map.put("image_type", "BASE64");
                         map.put("face_type", "LIVE");
-
                         params.add(GsonUtils.toJson(map));
-
                         map.clear();
-
                         map.put("image", encode2);
                         map.put("image_type", "BASE64");
                         map.put("face_type", "LIVE");
-
                         params.add(GsonUtils.toJson(map));
-//
-
-
                         // 注意这里仅为了简化编码每一次请求都去获取access_token，线上环境access_token有过期时间， 客户端可自行缓存，过期后重新获取。
-//            String accessToken = "[调用鉴权接口获取的token]";
-
                         String result = HttpUtil.post(url, accessToken, "application/json", params.toString());
-//                    showContrastResult(result);
-
                         ResultMsg resultMsg = GsonUtils.fromJson(result, ResultMsg.class);
-
+                        //获取相似度
                         if (resultMsg.getError_code() == 0) {
                             Result conResult = resultMsg.getResult();
                             if (conResult.getScore().intValue() > maxLikeDegree) {
                                 maxLikeImgId = next.getKey();
                                 maxLikeDegree = conResult.getScore().intValue();
                             }
-
+                            //更新processBar
                             runOnUiThread(new Runnable() {
                                 @Override
                                 public void run() {
@@ -471,7 +450,7 @@ public class MainActivity extends AppCompatActivity {
                         }
                         prog++;
                     }
-
+                    //展示结果
                     showResult();
 
                 } catch (Exception e) {
@@ -479,7 +458,6 @@ public class MainActivity extends AppCompatActivity {
                 }
             }
         }).start();
-
         return;
     }
 
