@@ -84,13 +84,10 @@ public class MainActivity extends AppCompatActivity {
     private MaterialCardView sInfo;
 
 
-
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
-
-
 
         ConnectivityManager cManager=(ConnectivityManager)getSystemService(Context.CONNECTIVITY_SERVICE);
         NetworkInfo info = cManager.getActiveNetworkInfo();
@@ -257,7 +254,6 @@ public class MainActivity extends AppCompatActivity {
             }
         });
 
-
         startButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
@@ -276,23 +272,7 @@ public class MainActivity extends AppCompatActivity {
 
     }
 
-
-//    @Override
-//    protected void onNewIntent(Intent intent) {
-//        super.onNewIntent(intent);
-//        setIntent(intent);
-//        if (intent.getIntExtra(ExpressionActivity.EXP_IMAGE_ID, -1) != -1) {
-////            setSelectImg(intent);
-//            setSelectImg();
-//        }
-//    }
-//
-//
-//    private void setSelectImg() {
-//        dbImages = ImageDataUtil.getDatabaseImage(this);
-//        iteratorDBImg = dbImages.entrySet().iterator();
-//    }
-
+    //申请使用相册权限
     private void openAlbum() {
 
         Intent intent = new Intent(Intent.ACTION_OPEN_DOCUMENT);
@@ -301,6 +281,7 @@ public class MainActivity extends AppCompatActivity {
         startActivityForResult(intent, CHOOSE_PHOTO);
     }
 
+    //得到申请权限结果：同意|拒绝
     @Override
     public void onRequestPermissionsResult(int requestCode, @NonNull String[] permissions, @NonNull int[] grantResults) {
         switch (requestCode) {
@@ -316,8 +297,8 @@ public class MainActivity extends AppCompatActivity {
 
     }
 
-
-    public void showDialogResult() {
+    //展示对比结果至主界面
+    public void showResult() {
         DatabaseHelper dbHelper = DatabaseHelper.getInstance(this);
         SQLiteDatabase db = dbHelper.getWritableDatabase();
 
@@ -346,8 +327,6 @@ public class MainActivity extends AppCompatActivity {
         runOnUiThread(new Runnable() {
             @Override
             public void run() {
-//                StringBuilder builder = new StringBuilder();
-//                builder.append(maxLikeImgId).append("\n").append(maxLikeDegree);
 
                 Bitmap target = BitmapUtil.stringtoBitmap(dbImages.get(maxLikeImgId));
                 chosenImageLeft.setImageBitmap(target);
@@ -395,7 +374,8 @@ public class MainActivity extends AppCompatActivity {
 
     }
 
-    public String faceMatch() {
+    //开始进行人脸对比
+    public void faceMatch() {
 
         dbImages = ImageDataUtil.getDatabaseImage(this);
         iteratorDBImg = dbImages.entrySet().iterator();
@@ -403,11 +383,11 @@ public class MainActivity extends AppCompatActivity {
 
         if (!iteratorDBImg.hasNext()) {
             errorInfo("数据库为空");
-            return null;
+            return;
         }
         else if (chosenImageRightBitmap == null) {
             errorInfo("未设置需对比人脸");
-            return null;
+            return;
         }
 
 
@@ -492,7 +472,7 @@ public class MainActivity extends AppCompatActivity {
                         prog++;
                     }
 
-                    showDialogResult();
+                    showResult();
 
                 } catch (Exception e) {
                     e.printStackTrace();
@@ -500,9 +480,10 @@ public class MainActivity extends AppCompatActivity {
             }
         }).start();
 
-        return null;
+        return;
     }
 
+    //得到从相册选取的图片的URI并转化为Bitmap
     @Override
     protected void onActivityResult(int requestCode, int resultCode, @Nullable Intent data) {
         super.onActivityResult(requestCode, resultCode, data);
@@ -543,8 +524,7 @@ public class MainActivity extends AppCompatActivity {
         }
     }
 
-
-
+    //通过URI将图片转化为Bitmap
     private Bitmap getBitmapFromUri(Uri uri) {
         Bitmap bitmap = null;
         try {
@@ -557,6 +537,7 @@ public class MainActivity extends AppCompatActivity {
         return bitmap;
     }
 
+    //展示错误信息
     private void errorInfo(ResultMsg resultMsg) {
 
         String errorMsg = resultMsg.getError_msg();
